@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: questions-service
+
+server:
+  port: ${PORT:8080}
