@@ -8,12 +8,17 @@ import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.service.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RestController
@@ -61,5 +66,29 @@ public class QuestionController {
     public ResponseEntity<Void> deleteQuestion(@PathVariable UUID id) {
         questionService.deleteQuestion(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ProblemDetail> handleNotFound(NoSuchElementException exception) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage()));
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ProblemDetail> handleBindException(BindException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Request could not be processed due to incorrect format"
+        );
+        problemDetail.setProperty("errors", exception.getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList()
+        );
+
+        return ResponseEntity
+                .badRequest()
+                .body(problemDetail);
     }
 }
