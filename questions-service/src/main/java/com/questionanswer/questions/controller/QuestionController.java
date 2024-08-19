@@ -1,8 +1,7 @@
 package com.questionanswer.questions.controller;
 
 
-import com.questionanswer.questions.controller.DTO.CreateQuestionDTO;
-import com.questionanswer.questions.controller.DTO.UpdateQuestionDTO;
+import com.questionanswer.questions.controller.DTO.QuestionDTO;
 import com.questionanswer.questions.controller.DTO.UpdateStatusDTO;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.service.QuestionService;
@@ -69,7 +68,7 @@ public class QuestionController {
                     schema = @Schema(implementation = ProblemDetail.class)
             ))
     })
-    public ResponseEntity<Question> createQuestion(@Valid @RequestBody CreateQuestionDTO dto,
+    public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDTO dto,
                                                    UriComponentsBuilder uriComponentsBuilder) {
         Question question = questionService.createQuestion(dto);
         return ResponseEntity
@@ -95,7 +94,7 @@ public class QuestionController {
             ))
     })
     public Question updateQuestion(@PathVariable UUID id,
-                                   @Valid @RequestBody UpdateQuestionDTO dto) {
+                                   @Valid @RequestBody QuestionDTO dto) {
         return questionService.updateQuestion(id, dto);
     }
 

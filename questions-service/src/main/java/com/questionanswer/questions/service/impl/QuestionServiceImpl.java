@@ -1,8 +1,7 @@
 package com.questionanswer.questions.service.impl;
 
 
-import com.questionanswer.questions.controller.DTO.CreateQuestionDTO;
-import com.questionanswer.questions.controller.DTO.UpdateQuestionDTO;
+import com.questionanswer.questions.controller.DTO.QuestionDTO;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.entity.QuestionStatus;
 import com.questionanswer.questions.repository.QuestionRepository;
@@ -32,7 +31,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Question createQuestion(CreateQuestionDTO dto) {
+    public Question createQuestion(QuestionDTO dto) {
         Question question = new Question(null, dto.title(), dto.text(), dto.status(), null);
         return questionRepository.save(question);
     }
@@ -40,7 +39,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Question updateQuestion(UUID id, UpdateQuestionDTO dto) {
+    public Question updateQuestion(UUID id, QuestionDTO dto) {
         Question question = questionRepository.findById(id).orElseThrow();
         question.setTitle(dto.title());
         question.setText(dto.text());

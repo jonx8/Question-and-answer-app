@@ -1,8 +1,7 @@
 package com.questionanswer.questions.service;
 
 
-import com.questionanswer.questions.controller.DTO.CreateQuestionDTO;
-import com.questionanswer.questions.controller.DTO.UpdateQuestionDTO;
+import com.questionanswer.questions.controller.DTO.QuestionDTO;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.entity.QuestionStatus;
 
@@ -14,9 +13,9 @@ public interface QuestionService {
 
     List<Question> getQuestions();
 
-    Question createQuestion(CreateQuestionDTO dto);
+    Question createQuestion(QuestionDTO dto);
 
-    Question updateQuestion(UUID id, UpdateQuestionDTO dto);
+    Question updateQuestion(UUID id, QuestionDTO dto);
 
     void changeStatus(UUID id, QuestionStatus status);
 
