@@ -1,6 +1,44 @@
 version: '3.9'
 
 services:
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:23.0.0
+    command: [ 'start-dev', '--import-realm' ]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: password
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: password
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/keycloak.crt.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/keycloak.key.pem
+    volumes:
+      - ~/certs/private.pem:/opt/keycloak/keycloak.key.pem
+      - ~/certs/cert.crt/:/opt/keycloak/keycloak.crt.pem
+      - ./question-and-answer-app-realm.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8180:8080"
+      - "8443:8443"
+    depends_on:
+      - keycloak-db
+    networks:
+      - qa-app-net
+
+  keycloak-db:
+    container_name: keycloak-db
+    image: postgres:16.3
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: keycloak
+    restart: on-failure
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - qa-app-net
+
   questions-db:
     container_name: questions-db
     image: postgres:16.3
@@ -13,6 +51,13 @@ services:
     restart: on-failure
     volumes:
       - questions-db-data:/var/lib/postgresql/data
+    networks:
+      - qa-app-net
 
 volumes:
   questions-db-data:
+  keycloak-db-data:
+
+networks:
+  qa-app-net:
+    name: qa-app-net
