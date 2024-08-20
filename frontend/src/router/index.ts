@@ -1,8 +1,8 @@
-import {createRouter, createWebHistory} from "vue-router";
+import {createRouter, createWebHistory, RouteLocation} from "vue-router";
 import Default from "@/layouts/default/Default.vue";
 import Index from "@/pages/Index.vue";
 import Profile from "@/pages/Profile.vue";
-import Question from "@/pages/Question.vue";
+import Question from "@/pages/QuestionDetail.vue";
 
 
 const routes = [
@@ -23,7 +23,10 @@ const routes = [
       {
         path: '/questions/:id',
         name: 'questions',
-        component: Question
+        component: Question,
+        props: function (route: RouteLocation) {
+          return {questionId: route.params.id}
+        },
       }
     ]
   }

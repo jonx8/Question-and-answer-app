@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
-import {ref} from "vue";
+import {onBeforeUpdate, onMounted, reactive, ref} from "vue";
+import api from "@/api";
+import {Question} from "@/api/generated";
+import QuestionCard from "@/components/QuestionCard.vue";
 
 const firstName = "Andrei"
 const lastName = "Malykh"
@@ -8,18 +11,16 @@ const username = "User"
 
 const selectedBlock = ref('questions')
 
-const questions = [
-  {
-    id: "dfgdgsdgsd",
-    title: "How i met your mother?",
-    text: "gdfgsdfgsdfkghsdfkfghesdh gidg lisdfghlihlisdfhglif"
-  },
-  {
-    id: "gdfgdfgdfgfd",
-    title: "How i met your father",
-    text: "gdfgsdfgsdfkghsdfkfghesdh gidg lisdfghlihlisdfhglif"
-  }
-]
+const questions = reactive([] as Question[])
+
+onMounted(async () => await loadUserQuestions())
+onBeforeUpdate(async () => await loadUserQuestions())
+
+async function loadUserQuestions() {
+  const response = await api.questionsApi.getQuestions()
+  Object.assign(questions, response.data)
+}
+
 </script>
 
 <template>
@@ -48,12 +49,11 @@ const questions = [
       </v-container>
     </v-card>
     <v-container class="w-50" v-if="selectedBlock == 'questions'">
-      <v-card v-for="question in questions" :key="question.id" class="ma-8">
-        <v-card-title>
-          <router-link :to="'/questions/' + question.id">{{ question.title }}</router-link>
-        </v-card-title>
-        <v-card-text>{{ question.text }}</v-card-text>
-      </v-card>
+      <QuestionCard v-for="question in questions"
+                    :key="question.id"
+                    :question="question"
+                    :with-link="true"
+                    class="ma-8"/>
     </v-container>
     <v-container class="w-50" v-else-if="selectedBlock == 'answers'">
       <v-card></v-card>

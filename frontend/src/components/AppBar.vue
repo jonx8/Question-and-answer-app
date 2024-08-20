@@ -22,7 +22,7 @@ const menuItems = [
   <v-toolbar color="primary">
     <v-toolbar-title> Questions</v-toolbar-title>
     <v-spacer/>
-    <v-btn-toggle mandatory v-model="navbarBtn" base-color="primary">
+    <v-btn-toggle class="mr-5" border mandatory v-model="navbarBtn" base-color="primary">
       <v-btn v-for="(item, index) in menuItems"
              active-color="black"
              :active="navbarBtn == index"
