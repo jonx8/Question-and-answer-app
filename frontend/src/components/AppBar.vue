@@ -20,9 +20,7 @@ const menuItems = [
 
 <template>
   <v-toolbar color="primary">
-    <v-toolbar-title>
-      <router-link class="toolbar-title-link" to="/">Questions</router-link>
-    </v-toolbar-title>
+    <v-toolbar-title> Questions</v-toolbar-title>
     <v-spacer/>
     <v-btn-toggle mandatory v-model="navbarBtn" base-color="primary">
       <v-btn v-for="(item, index) in menuItems"
@@ -39,8 +37,5 @@ const menuItems = [
 </template>
 
 <style>
-.toolbar-title-link {
-  text-decoration: none;
-  color: black;
-}
+
 </style>
