@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor
 public class QuestionController {
