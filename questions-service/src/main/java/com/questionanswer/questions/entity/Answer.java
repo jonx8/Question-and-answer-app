@@ -1,6 +1,7 @@
 package com.questionanswer.questions.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,34 +10,26 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 
 @Entity
 @Data
-@Table(name = "questions")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Question implements Serializable {
+@Table(name = "answers")
+public class Answer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    String title;
+    private String text;
 
-    @Column(nullable = false)
-    String text;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    QuestionStatus status;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "question")
-    List<Answer> answers;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id")
+    @JsonIgnore
+    private Question question;
 
     @CreationTimestamp
     @Column(nullable = false)
-    Timestamp createdAt;
-
-
+    private Timestamp createdAt;
 }

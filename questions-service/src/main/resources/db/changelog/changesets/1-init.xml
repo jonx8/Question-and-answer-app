@@ -6,7 +6,7 @@
 
     <changeSet id="init" author="Andrey Malykh">
         <createTable tableName="questions">
-            <column name="id" type="uuid">
+            <column name="id" type="bigint" autoIncrement="true" generationType="by default">
                 <constraints primaryKey="true"/>
             </column>
             <column name="title" type="varchar(255)">
@@ -17,6 +17,24 @@
             </column>
             <column name="status" type="varchar(30)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="answers">
+            <column name="id" type="bigint" autoIncrement="true" generationType="by default">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="text" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_id" type="bigint">
+                <constraints foreignKeyName="questions_answers_id_fkey"
+                             references="questions(id)"
+                             deleteCascade="true"
+                             nullable="false"
+                />
             </column>
             <column name="created_at" type="timestamp" defaultValueComputed="current_timestamp">
                 <constraints nullable="false"/>

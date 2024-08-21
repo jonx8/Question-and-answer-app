@@ -2,22 +2,26 @@ package com.questionanswer.questions.service;
 
 
 import com.questionanswer.questions.controller.DTO.QuestionDTO;
+import com.questionanswer.questions.controller.DTO.QuestionHeader;
+import com.questionanswer.questions.entity.Answer;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.entity.QuestionStatus;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface QuestionService {
-    Question getQuestion(UUID id);
+    Question getQuestion(Long id);
 
-    List<Question> getQuestions();
+    List<QuestionHeader> getQuestions();
 
-    Question createQuestion(QuestionDTO dto);
+    Question createQuestion(String title, String text, QuestionStatus status);
 
-    Question updateQuestion(UUID id, QuestionDTO dto);
+    Question updateQuestion(Long id, QuestionDTO dto);
 
-    void changeStatus(UUID id, QuestionStatus status);
+    Question addAnswerToQuestion(Long id, String answerText);
 
-    void deleteQuestion(UUID id);
+    void changeStatus(Long id, QuestionStatus status);
+
+    void deleteQuestion(Long id);
 }

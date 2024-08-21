@@ -13,7 +13,10 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${spring.datasource.name}
 
   jpa:
-    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    open-in-view: true
+
 
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
