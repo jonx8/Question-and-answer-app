@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
+@SecurityRequirement(name = "keycloak")
 @CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor

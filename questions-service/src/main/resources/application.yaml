@@ -21,6 +21,21 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.url}
+
+
+
 springdoc:
   api-docs:
     path: "/api-docs"
+  swagger-ui:
+    oauth:
+      client-id: questions-service-swagger
+      use-pkce-with-authorization-code-grant: true
+
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8180/realms/question-and-answer-app}
