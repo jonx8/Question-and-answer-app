@@ -10,12 +10,15 @@ import com.questionanswer.questions.repository.QuestionRepository;
 import com.questionanswer.questions.service.QuestionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @Service
@@ -42,8 +45,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Question createQuestion(String title, String text, QuestionStatus status) {
-        Question question = new Question(null, title, text, status, new ArrayList<>(), Timestamp.from(Instant.now()));
+    public Question createQuestion(String title, String text, String authorId, QuestionStatus status) {
+        Question question = new Question(null, title, text, authorId, status, new ArrayList<>(), Timestamp.from(Instant.now()));
         return questionRepository.save(question);
     }
 
@@ -60,9 +63,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Question addAnswerToQuestion(Long id, String answerText) {
+    public Question addAnswerToQuestion(Long id, String answerText, String authorId) {
         Question question = questionRepository.findById(id).orElseThrow();
-        question.getAnswers().add(new Answer(null, answerText, question, Timestamp.from(Instant.now())));
+        if (question.getAuthor().equals(authorId)) {
+            throw new AccessDeniedException("You can not to add an answer to your own question");
+        }
+        question.getAnswers().add(new Answer(null, answerText, authorId, question, Timestamp.from(Instant.now())));
         return questionRepository.save(question);
     }
 

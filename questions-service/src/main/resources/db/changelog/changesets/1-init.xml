@@ -15,6 +15,9 @@
             <column name="text" type="text">
                 <constraints nullable="false"/>
             </column>
+            <column name="author" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
             <column name="status" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
@@ -35,6 +38,9 @@
                              deleteCascade="true"
                              nullable="false"
                 />
+            </column>
+            <column name="author" type="varchar(100)">
+                <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp" defaultValueComputed="current_timestamp">
                 <constraints nullable="false"/>

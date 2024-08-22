@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -21,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -74,8 +75,10 @@ public class QuestionController {
             ))
     })
     public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDTO dto,
+                                                   JwtAuthenticationToken accessToken,
                                                    UriComponentsBuilder uriComponentsBuilder) {
-        Question question = questionService.createQuestion(dto.title(), dto.text(), dto.status());
+        Question question = questionService.createQuestion(dto.title(), dto.text(), accessToken.getName(), dto.status());
+
         return ResponseEntity
                 .created(uriComponentsBuilder
                         .replacePath("/api/questions/{questionId}")
@@ -147,13 +150,14 @@ public class QuestionController {
     })
     public ResponseEntity<Question> addAnswer(@PathVariable Long id,
                                               @RequestBody AnswerDTO dto,
+                                              JwtAuthenticationToken accessToken,
                                               UriComponentsBuilder uriComponentsBuilder) {
         return ResponseEntity
                 .created(uriComponentsBuilder
                         .replacePath("/api/questions/{questionId}")
                         .build(Map.of("questionId", id))
                 )
-                .body(questionService.addAnswerToQuestion(id, dto.text()));
+                .body(questionService.addAnswerToQuestion(id, dto.text(), accessToken.getName()));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -177,5 +181,12 @@ public class QuestionController {
         return ResponseEntity
                 .badRequest()
                 .body(problemDetail);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ProblemDetail> handleAccessDenied(AccessDeniedException exception) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage()));
     }
 }

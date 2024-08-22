@@ -29,6 +29,9 @@ public class Question implements Serializable {
     String text;
 
     @Column(nullable = false)
+    String author;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     QuestionStatus status;
 
