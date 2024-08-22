@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,7 +33,7 @@ public class Question implements Serializable {
     QuestionStatus status;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "question")
-    List<Answer> answers;
+    List<Answer> answers = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false)
