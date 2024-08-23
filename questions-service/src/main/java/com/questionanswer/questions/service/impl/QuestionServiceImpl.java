@@ -38,6 +38,7 @@ public class QuestionServiceImpl implements QuestionService {
                         question.getId(),
                         question.getTitle(),
                         question.getText(),
+                        question.getAuthor(),
                         question.getStatus(),
                         question.getCreatedAt()
                 )).toList();
