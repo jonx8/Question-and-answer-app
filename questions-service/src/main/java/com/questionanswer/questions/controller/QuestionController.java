@@ -46,8 +46,9 @@ public class QuestionController {
                     array = @ArraySchema(schema = @Schema(implementation = QuestionHeader.class)))
             )}
     )
-    public List<QuestionHeader> getQuestions() {
-        return questionService.getQuestions();
+    public List<QuestionHeader> getQuestions(@RequestParam(required = false) String author,
+                                             JwtAuthenticationToken accessToken) {
+        return questionService.getQuestions(author, accessToken);
     }
 
     @GetMapping("/{id}")
@@ -60,8 +61,8 @@ public class QuestionController {
                     schema = @Schema(implementation = ProblemDetail.class)
             ))
     })
-    public Question getQuestion(@PathVariable Long id) {
-        return questionService.getQuestion(id);
+    public Question getQuestion(@PathVariable Long id, JwtAuthenticationToken accessToken) {
+        return questionService.getQuestion(id, accessToken);
     }
 
     @PostMapping
@@ -102,8 +103,9 @@ public class QuestionController {
             ))
     })
     public Question updateQuestion(@PathVariable Long id,
-                                   @Valid @RequestBody QuestionDTO dto) {
-        return questionService.updateQuestion(id, dto);
+                                   @Valid @RequestBody QuestionDTO dto,
+                                   JwtAuthenticationToken accessToken) {
+        return questionService.updateQuestion(id, dto, accessToken);
     }
 
     @PatchMapping("/{id}")
@@ -119,16 +121,22 @@ public class QuestionController {
             ))
     })
     public ResponseEntity<Void> changeQuestionStatus(@PathVariable Long id,
-                                                     @Valid @RequestBody UpdateStatusDTO dto) {
-        questionService.changeStatus(id, dto.status());
+                                                     @Valid @RequestBody UpdateStatusDTO dto,
+                                                     JwtAuthenticationToken accessToken) {
+        questionService.changeStatus(id, dto.status(), accessToken);
         return ResponseEntity.noContent().build();
     }
 
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete question", responses = {@ApiResponse(responseCode = "204")})
-    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
-        questionService.deleteQuestion(id);
+    @Operation(summary = "Delete question", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "404", content = @Content(
+                    mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                    schema = @Schema(implementation = ProblemDetail.class)
+            ))})
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id, JwtAuthenticationToken accessToken) {
+        questionService.deleteQuestion(id, accessToken);
         return ResponseEntity.noContent().build();
     }
 

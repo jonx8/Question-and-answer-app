@@ -10,15 +10,15 @@ import com.questionanswer.questions.repository.QuestionRepository;
 import com.questionanswer.questions.service.QuestionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 
 @Service
@@ -27,13 +27,28 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
 
     @Override
-    public Question getQuestion(Long id) {
-        return questionRepository.findById(id).orElseThrow();
+    public Question getQuestion(Long id, JwtAuthenticationToken accessToken) {
+        Question question = questionRepository.findById(id).orElseThrow();
+        if (!question.getStatus().equals(QuestionStatus.PUBLISHED) && !hasFullAccess(accessToken, question)) {
+            throw new AccessDeniedException("You do not have access to this question");
+        }
+        return question;
     }
 
     @Override
-    public List<QuestionHeader> getQuestions() {
+    public List<QuestionHeader> getQuestions(String authorId, JwtAuthenticationToken accessToken) {
+        Predicate<Question> publishedFilter = question -> question.getStatus().equals(QuestionStatus.PUBLISHED);
+        Predicate<Question> authorFilter = question -> question.getAuthor().equals(authorId);
+        Predicate<Question> filter = publishedFilter;
+
+        if (authorId != null) {
+            filter = filter.and(authorFilter);
+            if (authorId.equals(accessToken.getName()) || isAdmin(accessToken)) {
+                filter = authorFilter;
+            }
+        }
         return questionRepository.findAll().stream()
+                .filter(filter)
                 .map(question -> new QuestionHeader(
                         question.getId(),
                         question.getTitle(),
@@ -54,8 +69,11 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Question updateQuestion(Long id, QuestionDTO dto) {
+    public Question updateQuestion(Long id, QuestionDTO dto, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
+        if (!hasFullAccess(accessToken, question)) {
+            throw new AccessDeniedException("You can not to delete this question");
+        }
         question.setTitle(dto.title());
         question.setText(dto.text());
         question.setStatus(dto.status());
@@ -75,15 +93,32 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public void changeStatus(Long id, QuestionStatus status) {
+    public void changeStatus(Long id, QuestionStatus status, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
+        if (!hasFullAccess(accessToken, question)) {
+            throw new AccessDeniedException("You can not to edit this question");
+        }
         question.setStatus(status);
         questionRepository.save(question);
     }
 
     @Override
     @Transactional
-    public void deleteQuestion(Long id) {
+    public void deleteQuestion(Long id, JwtAuthenticationToken accessToken) {
+        Question question = questionRepository.findById(id).orElseThrow();
+        if (!hasFullAccess(accessToken, question)) {
+            throw new AccessDeniedException("You can not to delete this question");
+        }
         questionRepository.deleteById(id);
+    }
+
+
+    private Boolean hasFullAccess(JwtAuthenticationToken accessToken, Question question) {
+        return isAdmin(accessToken) || accessToken.getName().equals(question.getAuthor());
+    }
+
+    private Boolean isAdmin(JwtAuthenticationToken accessToken) {
+        return accessToken.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
     }
 }
