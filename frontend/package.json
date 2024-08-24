@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run openapi-generate && vite",
     "build": "vue-tsc --noEmit && vite build",
     "openapi-generate": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8080/api-docs -g typescript-axios -o src/api/generated",
     "preview": "vite preview",
