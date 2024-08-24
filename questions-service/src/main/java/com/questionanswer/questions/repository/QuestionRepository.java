@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findQuestionsByStatus(QuestionStatus status);
-    List<Question> findQuestionsByAuthor(String author);
-    List<Question> findQuestionsByAuthorAndStatus(String author, QuestionStatus status);
+    List<Question> findAllByStatusOrderByCreatedAtDesc(QuestionStatus status);
+    List<Question> findAllByAuthorOrderByCreatedAtDesc(String author);
+    List<Question> findAllByAuthorAndStatusOrderByCreatedAtDesc(String author, QuestionStatus status);
 }

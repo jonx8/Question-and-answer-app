@@ -29,10 +29,10 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Question getQuestion(Long id, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
-        if (!question.getStatus().equals(QuestionStatus.PUBLISHED) && !hasFullAccess(accessToken, question.getAuthor()                                                                                                                                  )) {
-            throw new AccessDeniedException("You do not have access to this question");
+        if (question.getStatus().equals(QuestionStatus.PUBLISHED) || hasFullAccess(accessToken, question.getAuthor())) {
+            return question;
         }
-        return question;
+        throw new AccessDeniedException("You do not have access to this question");
     }
 
     @Override
@@ -40,12 +40,12 @@ public class QuestionServiceImpl implements QuestionService {
         Stream<Question> questionStream;
 
         if (authorId != null) {
-            questionStream = questionRepository.findQuestionsByAuthorAndStatus(authorId, QuestionStatus.PUBLISHED).stream();
+            questionStream = questionRepository.findAllByAuthorAndStatusOrderByCreatedAtDesc(authorId, QuestionStatus.PUBLISHED).stream();
             if (hasFullAccess(accessToken, authorId)) {
-                questionStream = questionRepository.findQuestionsByAuthor(authorId).stream();
+                questionStream = questionRepository.findAllByAuthorOrderByCreatedAtDesc(authorId).stream();
             }
         } else {
-            questionStream = questionRepository.findQuestionsByStatus(QuestionStatus.PUBLISHED).stream();
+            questionStream = questionRepository.findAllByStatusOrderByCreatedAtDesc(QuestionStatus.PUBLISHED).stream();
         }
 
         return questionStream.map(question -> new QuestionHeader(
