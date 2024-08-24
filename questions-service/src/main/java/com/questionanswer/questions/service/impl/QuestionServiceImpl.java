@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 
 @Service
@@ -29,7 +29,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Question getQuestion(Long id, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
-        if (!question.getStatus().equals(QuestionStatus.PUBLISHED) && !hasFullAccess(accessToken, question)) {
+        if (!question.getStatus().equals(QuestionStatus.PUBLISHED) && !hasFullAccess(accessToken, question.getAuthor()                                                                                                                                  )) {
             throw new AccessDeniedException("You do not have access to this question");
         }
         return question;
@@ -37,26 +37,25 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionHeader> getQuestions(String authorId, JwtAuthenticationToken accessToken) {
-        Predicate<Question> publishedFilter = question -> question.getStatus().equals(QuestionStatus.PUBLISHED);
-        Predicate<Question> authorFilter = question -> question.getAuthor().equals(authorId);
-        Predicate<Question> filter = publishedFilter;
+        Stream<Question> questionStream;
 
         if (authorId != null) {
-            filter = filter.and(authorFilter);
-            if (authorId.equals(accessToken.getName()) || isAdmin(accessToken)) {
-                filter = authorFilter;
+            questionStream = questionRepository.findQuestionsByAuthorAndStatus(authorId, QuestionStatus.PUBLISHED).stream();
+            if (hasFullAccess(accessToken, authorId)) {
+                questionStream = questionRepository.findQuestionsByAuthor(authorId).stream();
             }
+        } else {
+            questionStream = questionRepository.findQuestionsByStatus(QuestionStatus.PUBLISHED).stream();
         }
-        return questionRepository.findAll().stream()
-                .filter(filter)
-                .map(question -> new QuestionHeader(
-                        question.getId(),
-                        question.getTitle(),
-                        question.getText(),
-                        question.getAuthor(),
-                        question.getStatus(),
-                        question.getCreatedAt()
-                )).toList();
+
+        return questionStream.map(question -> new QuestionHeader(
+                question.getId(),
+                question.getTitle(),
+                question.getText(),
+                question.getAuthor(),
+                question.getStatus(),
+                question.getCreatedAt()
+        )).toList();
     }
 
     @Override
@@ -71,7 +70,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional
     public Question updateQuestion(Long id, QuestionDTO dto, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
-        if (!hasFullAccess(accessToken, question)) {
+        if (!hasFullAccess(accessToken, question.getAuthor())) {
             throw new AccessDeniedException("You can not to delete this question");
         }
         question.setTitle(dto.title());
@@ -95,7 +94,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional
     public void changeStatus(Long id, QuestionStatus status, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
-        if (!hasFullAccess(accessToken, question)) {
+        if (!hasFullAccess(accessToken, question.getAuthor())) {
             throw new AccessDeniedException("You can not to edit this question");
         }
         question.setStatus(status);
@@ -106,15 +105,15 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional
     public void deleteQuestion(Long id, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
-        if (!hasFullAccess(accessToken, question)) {
+        if (!hasFullAccess(accessToken, question.getAuthor())) {
             throw new AccessDeniedException("You can not to delete this question");
         }
         questionRepository.deleteById(id);
     }
 
 
-    private Boolean hasFullAccess(JwtAuthenticationToken accessToken, Question question) {
-        return isAdmin(accessToken) || accessToken.getName().equals(question.getAuthor());
+    private Boolean hasFullAccess(JwtAuthenticationToken accessToken, String authorId) {
+        return isAdmin(accessToken) || accessToken.getName().equals(authorId);
     }
 
     private Boolean isAdmin(JwtAuthenticationToken accessToken) {
