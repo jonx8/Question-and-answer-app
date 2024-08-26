@@ -13,17 +13,26 @@ const routes = [
       {
         path: '',
         name: 'Home',
-        component: Index
+        component: Index,
+        meta: {
+          secured: true,
+        }
       },
       {
         path: '/profile',
         name: 'profile',
-        component: Profile
+        component: Profile,
+        meta: {
+          secured: true,
+        }
       },
       {
         path: '/questions/:id',
         name: 'questions',
         component: Question,
+        meta: {
+          secured: true,
+        },
         props: function (route: RouteLocation) {
           return {questionId: route.params.id}
         },
