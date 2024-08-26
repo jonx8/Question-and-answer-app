@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 @RestController
 @SecurityRequirement(name = "keycloak")
@@ -33,7 +32,7 @@ public class AnswerController {
                     array = @ArraySchema(schema = @Schema(implementation = Answer.class)))
             )
     })
-    public List<Answer> getAnswersByAuthor(@RequestParam(required = false) String author) {
+    public List<Answer> getAnswersByAuthor(@RequestParam String author) {
         return answerService.getAnswersByAuthor(author);
     }
 
