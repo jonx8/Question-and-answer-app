@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -32,7 +33,7 @@ public class AnswerControllerTest {
                 .queryParam("author", "e95f8551-8bd3-477b-85b5-a3d4a5c143a8")
                 .with(jwt());
 
-        this.mockMvc.perform(requestBuilder).andExpectAll(
+        this.mockMvc.perform(requestBuilder).andDo(print()).andExpectAll(
                 status().isOk(),
                 content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
                 jsonPath("$[0].id").value(2)
