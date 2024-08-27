@@ -1,6 +1,6 @@
 package com.questionanswer.questions.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,11 +24,11 @@ public class Answer implements Serializable {
     private String text;
 
     @Column(nullable = false)
-    String author;
+    private String author;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
-    @JsonIgnoreProperties({"answers", "hibernateLazyInitializer", "handler"})
+    @JsonBackReference
     private Question question;
 
     @CreationTimestamp

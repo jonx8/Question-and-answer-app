@@ -1,6 +1,7 @@
 package com.questionanswer.questions.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,24 +24,25 @@ public class Question implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    String title;
+    private String title;
 
     @Column(nullable = false)
-    String text;
+    private String text;
 
     @Column(nullable = false)
-    String author;
+    private String author;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    QuestionStatus status;
+    private QuestionStatus status;
 
+    @JsonManagedReference
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "question")
-    List<Answer> answers = new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false)
-    Timestamp createdAt;
+    private Timestamp createdAt;
 
 
 }
