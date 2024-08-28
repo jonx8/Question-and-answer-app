@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: users-service
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
+
+keycloak:
+  clientId: admin-cli
+  clientSecret: ${KEYCLOAK_SECRET}
+  realm: ${KEYCLOAK_REALM:question-and-answer-app}
+  url: ${KEYCLOAK_URL:http://localhost:8180}

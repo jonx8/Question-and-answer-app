@@ -25,7 +25,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${keycloak.url}
+          issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
 
 
 
@@ -38,4 +38,5 @@ springdoc:
       use-pkce-with-authorization-code-grant: true
 
 keycloak:
-  url: ${KEYCLOAK_URL:http://localhost:8180/realms/question-and-answer-app}
+  url: ${KEYCLOAK_URL:http://localhost:8180}
+  realm: ${KEYCLOAK_REALM:question-and-answer-app}

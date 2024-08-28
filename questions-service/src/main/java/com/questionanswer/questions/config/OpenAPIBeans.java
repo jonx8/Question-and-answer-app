@@ -16,8 +16,8 @@ public class OpenAPIBeans {
             type = SecuritySchemeType.OAUTH2,
             flows = @OAuthFlows(
                     authorizationCode = @OAuthFlow(
-                            authorizationUrl = "${keycloak.url}/protocol/openid-connect/auth",
-                            tokenUrl = "${keycloak.url}/protocol/openid-connect/token",
+                            authorizationUrl = "${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/auth",
+                            tokenUrl = "${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/token",
                             scopes = {
                                     @OAuthScope(name = "openid"),
                                     @OAuthScope(name = "microprofile-jwt")
