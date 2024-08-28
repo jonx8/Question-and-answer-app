@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 
 import QuestionCard from "@/components/QuestionCard.vue";
-import {onBeforeUpdate, onMounted, reactive} from "vue";
+import {onBeforeUpdate, onMounted, ref} from "vue";
 import api from "@/api";
-import {Question} from "@/api/generated";
+import {QuestionHeader} from "@/api/generated";
 
-const questions = reactive([] as Question[])
+const questions = ref([] as QuestionHeader[])
 onMounted(async () => await loadQuestions())
 onBeforeUpdate(async () => await loadQuestions())
 
 
 async function loadQuestions() {
   const response = await api.questionsApi.getQuestions()
-  Object.assign(questions, response.data)
+  questions.value = response.data
 }
 
 </script>
@@ -26,5 +26,6 @@ async function loadQuestions() {
                   :question="question"
                   class="ma-4 w-50"
     />
+    <h3 v-if="questions.length == 0">There are no any questions yet.</h3>
   </v-container>
 </template>

@@ -8,3 +8,11 @@
 // @use 'vuetify/settings' with (
 //   $color-pack: false
 // );
+
+.app-link {
+  text-decoration: none;
+}
+
+.app-link:hover {
+  text-decoration: underline;
+}

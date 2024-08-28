@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
 import {ref} from "vue";
-
+import {useKeycloak} from "@/plugins/keycloak";
+const keycloak = useKeycloak();
 const navbarBtn = ref(0)
 const menuItems = [
   {
@@ -15,6 +16,11 @@ const menuItems = [
     icon: 'mdi-account',
   }
 ]
+
+
+async function logout() {
+  window.location.replace(keycloak.createLogoutUrl())
+}
 
 </script>
 
@@ -32,7 +38,7 @@ const menuItems = [
              :icon="item.icon"
       />
     </v-btn-toggle>
-    <v-btn icon="mdi-export"/>
+    <v-btn icon="mdi-export" v-if="keycloak.authenticated" @click="logout()"/>
   </v-toolbar>
 </template>
 

@@ -3,6 +3,7 @@ import {onBeforeUpdate, onMounted, reactive} from "vue";
 import api from "@/api";
 import {Question} from "@/api/generated";
 import QuestionCard from "@/components/QuestionCard.vue";
+import AnswerCard from "@/components/AnswerCard.vue";
 
 
 const props = defineProps({
@@ -14,7 +15,7 @@ onMounted(async () => await loadQuestionInfo())
 onBeforeUpdate(async () => await loadQuestionInfo())
 
 async function loadQuestionInfo() {
-  const response = await api.questionsApi.getQuestion(props.questionId)
+  const response = await api.questionsApi.getQuestion(parseInt(props.questionId))
   Object.assign(question, response.data)
 }
 
@@ -23,6 +24,17 @@ async function loadQuestionInfo() {
 <template>
   <v-container class="d-flex flex-column align-center">
     <QuestionCard :question="question" class="w-50"/>
+    <h3 class="justify-center mt-5">Answers</h3>
+    <v-container class="d-flex justify-center">
+      <AnswerCard v-for="answer in question.answers"
+                  :user-data="{firstName: 'Ivan', lastName: 'Ivanov'}"
+                  :key="answer.id"
+                  :answer="answer"
+                  class="ma-3 w-66"
+
+      />
+      <h4 v-if="question.answers?.length == 0">No answers yet</h4>
+    </v-container>
   </v-container>
 </template>
 

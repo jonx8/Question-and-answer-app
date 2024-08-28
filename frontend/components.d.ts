@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnswerCard: typeof import('./src/components/AnswerCard.vue')['default']
     AppBar: typeof import('./src/components/AppBar.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     QuestionCard: typeof import('./src/components/QuestionCard.vue')['default']
