@@ -15,8 +15,9 @@ public class SecurityBeans {
     protected SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .authorizeHttpRequests(config -> config
-                        .requestMatchers("/api/users/**")
-                        .authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -11,6 +11,17 @@ spring:
         jwt:
           issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
 
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+  swagger-ui:
+    oauth:
+      client-id: users-service-swagger
+      use-pkce-with-authorization-code-grant: true
+
+
 keycloak:
   clientId: admin-cli
   clientSecret: ${KEYCLOAK_SECRET}
