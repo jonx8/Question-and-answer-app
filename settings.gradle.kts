@@ -1,4 +1,5 @@
 rootProject.name = "question-and-answer-app"
 
-includeBuild("questions-service")
-includeBuild("users-service")
+include("questions-service")
+include("users-service")
+include("eureka-server")
