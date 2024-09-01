@@ -1,7 +1,7 @@
 package com.questionanswer.questions.service.impl;
 
 
-import com.questionanswer.questions.controller.dto.questionDto;
+import com.questionanswer.questions.controller.dto.QuestionDto;
 import com.questionanswer.questions.controller.dto.QuestionHeader;
 import com.questionanswer.questions.entity.Answer;
 import com.questionanswer.questions.entity.Question;
@@ -67,7 +67,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Question updateQuestion(Long id, questionDto dto, JwtAuthenticationToken accessToken) {
+    public Question updateQuestion(Long id, QuestionDto dto, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
         if (!hasFullAccess(accessToken, question.getAuthor())) {
             throw new AccessDeniedException("You can not to delete this question");

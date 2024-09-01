@@ -1,7 +1,7 @@
 package com.questionanswer.questions.service;
 
 
-import com.questionanswer.questions.controller.dto.questionDto;
+import com.questionanswer.questions.controller.dto.QuestionDto;
 import com.questionanswer.questions.controller.dto.QuestionHeader;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.entity.QuestionStatus;
@@ -16,7 +16,7 @@ public interface QuestionService {
 
     Question createQuestion(String title, String text, String authorId, QuestionStatus status);
 
-    Question updateQuestion(Long id, questionDto dto, JwtAuthenticationToken accessToken);
+    Question updateQuestion(Long id, QuestionDto dto, JwtAuthenticationToken accessToken);
 
     Question addAnswerToQuestion(Long id, String answerText, String authorId);
 

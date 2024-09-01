@@ -2,7 +2,7 @@ package com.questionanswer.questions.controller;
 
 
 import com.questionanswer.questions.controller.dto.AnswerDto;
-import com.questionanswer.questions.controller.dto.questionDto;
+import com.questionanswer.questions.controller.dto.QuestionDto;
 import com.questionanswer.questions.controller.dto.QuestionHeader;
 import com.questionanswer.questions.controller.dto.UpdateStatusDto;
 import com.questionanswer.questions.entity.Question;
@@ -70,7 +70,7 @@ public class QuestionController {
                     schema = @Schema(implementation = ProblemDetail.class)
             ))
     })
-    public ResponseEntity<Question> createQuestion(@Valid @RequestBody questionDto dto,
+    public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDto dto,
                                                    JwtAuthenticationToken accessToken,
                                                    UriComponentsBuilder uriComponentsBuilder) {
         Question question = questionService.createQuestion(dto.title(), dto.text(), accessToken.getName(), dto.status());
@@ -98,7 +98,7 @@ public class QuestionController {
             ))
     })
     public Question updateQuestion(@PathVariable Long id,
-                                   @Valid @RequestBody questionDto dto,
+                                   @Valid @RequestBody QuestionDto dto,
                                    JwtAuthenticationToken accessToken) {
         return questionService.updateQuestion(id, dto, accessToken);
     }
