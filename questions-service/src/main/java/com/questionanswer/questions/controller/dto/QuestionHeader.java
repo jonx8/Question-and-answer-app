@@ -1,4 +1,4 @@
-package com.questionanswer.questions.controller.DTO;
+package com.questionanswer.questions.controller.dto;
 
 import com.questionanswer.questions.entity.QuestionStatus;
 

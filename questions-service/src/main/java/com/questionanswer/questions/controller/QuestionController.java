@@ -1,10 +1,10 @@
 package com.questionanswer.questions.controller;
 
 
-import com.questionanswer.questions.controller.DTO.AnswerDTO;
-import com.questionanswer.questions.controller.DTO.QuestionDTO;
-import com.questionanswer.questions.controller.DTO.QuestionHeader;
-import com.questionanswer.questions.controller.DTO.UpdateStatusDTO;
+import com.questionanswer.questions.controller.dto.AnswerDto;
+import com.questionanswer.questions.controller.dto.questionDto;
+import com.questionanswer.questions.controller.dto.QuestionHeader;
+import com.questionanswer.questions.controller.dto.UpdateStatusDto;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,7 +70,7 @@ public class QuestionController {
                     schema = @Schema(implementation = ProblemDetail.class)
             ))
     })
-    public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDTO dto,
+    public ResponseEntity<Question> createQuestion(@Valid @RequestBody questionDto dto,
                                                    JwtAuthenticationToken accessToken,
                                                    UriComponentsBuilder uriComponentsBuilder) {
         Question question = questionService.createQuestion(dto.title(), dto.text(), accessToken.getName(), dto.status());
@@ -98,7 +98,7 @@ public class QuestionController {
             ))
     })
     public Question updateQuestion(@PathVariable Long id,
-                                   @Valid @RequestBody QuestionDTO dto,
+                                   @Valid @RequestBody questionDto dto,
                                    JwtAuthenticationToken accessToken) {
         return questionService.updateQuestion(id, dto, accessToken);
     }
@@ -116,7 +116,7 @@ public class QuestionController {
             ))
     })
     public ResponseEntity<Void> changeQuestionStatus(@PathVariable Long id,
-                                                     @Valid @RequestBody UpdateStatusDTO dto,
+                                                     @Valid @RequestBody UpdateStatusDto dto,
                                                      JwtAuthenticationToken accessToken) {
         questionService.changeStatus(id, dto.status(), accessToken);
         return ResponseEntity.noContent().build();
@@ -152,7 +152,7 @@ public class QuestionController {
             ))
     })
     public ResponseEntity<Question> addAnswer(@PathVariable Long id,
-                                              @RequestBody AnswerDTO dto,
+                                              @RequestBody AnswerDto dto,
                                               JwtAuthenticationToken accessToken,
                                               UriComponentsBuilder uriComponentsBuilder) {
         return ResponseEntity
