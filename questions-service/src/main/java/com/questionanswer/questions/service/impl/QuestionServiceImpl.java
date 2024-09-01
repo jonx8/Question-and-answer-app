@@ -14,7 +14,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +60,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public Question createQuestion(String title, String text, String authorId, QuestionStatus status) {
-        Question question = new Question(null, title, text, authorId, status, new ArrayList<>(), Timestamp.from(Instant.now()));
+        Question question = new Question(null, title, text, authorId, status, new ArrayList<>(), Instant.now());
         return questionRepository.save(question);
     }
 
@@ -86,7 +85,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getAuthor().equals(authorId)) {
             throw new AccessDeniedException("You can not to add an answer to your own question");
         }
-        question.getAnswers().add(new Answer(null, answerText, authorId, question, Timestamp.from(Instant.now())));
+        question.getAnswers().add(new Answer(null, answerText, authorId, question, Instant.now()));
         return questionRepository.save(question);
     }
 

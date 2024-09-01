@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Data
@@ -33,5 +33,5 @@ public class Answer implements Serializable {
 
     @CreationTimestamp
     @Column(nullable = false)
-    private Timestamp createdAt;
+    private Instant createdAt;
 }
