@@ -111,11 +111,11 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
 
-    private Boolean hasFullAccess(JwtAuthenticationToken accessToken, String authorId) {
+    private boolean hasFullAccess(JwtAuthenticationToken accessToken, String authorId) {
         return isAdmin(accessToken) || accessToken.getName().equals(authorId);
     }
 
-    private Boolean isAdmin(JwtAuthenticationToken accessToken) {
+    private boolean isAdmin(JwtAuthenticationToken accessToken) {
         return accessToken.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
     }
