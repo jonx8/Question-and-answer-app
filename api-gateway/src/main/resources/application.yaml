@@ -9,30 +9,47 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: http://localhost:3000
+            allowCredentials: true
+            allowed-headers: "*"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin Vary
       routes:
-      - id: questions-service-api-route
-        uri: lb://questions-service
-        predicates:
-          - Path=/api/questions/** , /api/answers/**
+        - id: questions-service-api-route
+          uri: lb://questions-service
+          predicates:
+            - Path=/api/questions/** , /api/answers/**
 
-      - id: questions-service-openapi-route
-        uri: lb://questions-service
-        predicates:
-          - Path=/questions/v3/api-docs
-        filters:
-          - StripPrefix=1
+        - id: questions-service-openapi-route
+          uri: lb://questions-service
+          predicates:
+            - Path=/questions/v3/api-docs
+          filters:
+            - StripPrefix=1
 
-      - id: users-service-route
-        uri: lb://users-service
-        predicates:
-          - Path=/api/users/**
+        - id: users-service-route
+          uri: lb://users-service
+          predicates:
+            - Path=/api/users/**
 
-      - id: questions-service-openapi-route
-        uri: lb://users-service
-        predicates:
-          - Path=/users/v3/api-docs
-        filters:
-          - StripPrefix=1
+        - id: questions-service-openapi-route
+          uri: lb://users-service
+          predicates:
+            - Path=/users/v3/api-docs
+          filters:
+            - StripPrefix=1
+
 
 eureka:
   client:
