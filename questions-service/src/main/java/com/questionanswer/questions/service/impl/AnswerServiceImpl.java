@@ -4,11 +4,11 @@ package com.questionanswer.questions.service.impl;
 import com.questionanswer.questions.entity.Answer;
 import com.questionanswer.questions.repository.AnswerRepository;
 import com.questionanswer.questions.service.AnswerService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

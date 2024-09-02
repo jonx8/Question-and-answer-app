@@ -19,15 +19,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-public class AnswerControllerTest {
+class AnswerControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    final String PATH_PREFIX = "/api/answers";
+    private static final String PATH_PREFIX = "/api/answers";
 
     @Test
     @Sql("/sql/answers.sql")
-    public void getAnswersByAuthorTest() throws Exception {
+    void getAnswersByAuthorTest() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .get(PATH_PREFIX)
                 .queryParam("author", "e95f8551-8bd3-477b-85b5-a3d4a5c143a8")
@@ -43,7 +43,7 @@ public class AnswerControllerTest {
 
     @Test
     @Sql("/sql/answers.sql")
-    public void deleteOwnAnswerBySimpleUser() throws Exception {
+    void deleteOwnAnswerBySimpleUser() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .delete(PATH_PREFIX + "/2")
                 .with(jwt()
@@ -57,7 +57,8 @@ public class AnswerControllerTest {
 
     @Test
     @Sql("/sql/answers.sql")
-    public void deleteAnotherUserAnswerBySimpleUser() throws Exception {
+
+    void deleteAnotherUserAnswerBySimpleUser() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .delete(PATH_PREFIX + "/1")
                 .with(jwt()
@@ -74,7 +75,7 @@ public class AnswerControllerTest {
 
     @Test
     @Sql("/sql/answers.sql")
-    public void deleteAnotherUserAnswerByAdminUser() throws Exception {
+    void deleteAnotherUserAnswerByAdminUser() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .delete(PATH_PREFIX + "/1")
                 .with(jwt()

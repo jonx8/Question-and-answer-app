@@ -23,7 +23,7 @@ class QuestionControllerTest {
     private MockMvc mockMvc;
 
 
-    private final String PATH_PREFIX = "/api/questions";
+    private static final String PATH_PREFIX = "/api/questions";
 
 
     @Test
