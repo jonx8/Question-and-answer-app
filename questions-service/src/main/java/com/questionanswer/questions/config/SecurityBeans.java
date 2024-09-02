@@ -21,7 +21,7 @@ public class SecurityBeans {
                         .requestMatchers("/api/questions/**").authenticated()
                         .requestMatchers("/api/answers/**").authenticated()
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
                     var jwtAuthenticationConverter = new JwtAuthenticationConverter();

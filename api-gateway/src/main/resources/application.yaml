@@ -3,25 +3,36 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  main:
+    web-application-type: reactive
   application:
     name: api-gateway
   cloud:
     gateway:
-      mvc:
-        routes:
-          - id: questions-service-route
-            uri: lb://questions-service
-            predicates:
-              - Path=/questions/**
-            filters:
-              - StripPrefix=1
+      routes:
+      - id: questions-service-api-route
+        uri: lb://questions-service
+        predicates:
+          - Path=/api/questions/** , /api/answers/**
 
-          - id: users-service-route
-            uri: lb://users-service
-            predicates:
-              - Path=/users/**
-            filters:
-              - StripPrefix=1
+      - id: questions-service-openapi-route
+        uri: lb://questions-service
+        predicates:
+          - Path=/questions/v3/api-docs
+        filters:
+          - StripPrefix=1
+
+      - id: users-service-route
+        uri: lb://users-service
+        predicates:
+          - Path=/api/users/**
+
+      - id: questions-service-openapi-route
+        uri: lb://users-service
+        predicates:
+          - Path=/users/v3/api-docs
+        filters:
+          - StripPrefix=1
 
 eureka:
   client:
@@ -29,3 +40,7 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
     registry-fetch-interval-seconds: 1
+
+springdoc:
+  swagger-ui:
+    enabled: false
