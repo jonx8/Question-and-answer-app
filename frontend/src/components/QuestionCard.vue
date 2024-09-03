@@ -3,7 +3,7 @@ import type {Question} from "@/api/generated/questions";
 import {useKeycloak} from "@/plugins/keycloak";
 
 const keycloak = useKeycloak()
-withDefaults(defineProps<{ question: Question, withLink: Boolean }>(), {withLink: _ => false})
+defineProps<{ question: Question, withLink: Boolean }>()
 
 
 </script>

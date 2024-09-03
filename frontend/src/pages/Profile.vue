@@ -100,6 +100,7 @@ async function loadUserAnswers() {
     </v-container>
     <v-container class="w-50" v-else>
       <AnswerCard v-for="answer in answers"
+                  :with-link="true"
                   :answer="answer" :user-data="userProfile"
                   :key="answer.id" class="ma-4"/>
       <h4 v-if="answers.length == 0">You have not answered any questions yet.</h4>

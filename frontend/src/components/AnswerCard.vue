@@ -2,11 +2,11 @@
 import {Answer} from "@/api/generated/questions";
 import {KeycloakProfile} from "keycloak-js";
 
-withDefaults(defineProps<{
+defineProps<{
   answer: Answer,
   userData: KeycloakProfile,
   withLink: boolean
-}>(), {withLink: _ => false})
+}>()
 </script>
 
 <template>

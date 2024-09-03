@@ -21,13 +21,14 @@ async function loadQuestionInfo() {
 
 <template>
   <v-container class="d-flex flex-column align-center">
-    <QuestionCard :question="question" class="w-50"/>
+    <QuestionCard :question="question" :with-link=false class="w-50"/>
     <h3 class="justify-center mt-5">Answers</h3>
     <v-container class="d-flex justify-center">
       <AnswerCard v-for="answer in question.answers"
                   :user-data="{firstName: 'Ivan', lastName: 'Ivanov'}"
                   :key="answer.id"
                   :answer="answer"
+                  :with-link="false"
                   class="ma-3 w-66"
 
       />
