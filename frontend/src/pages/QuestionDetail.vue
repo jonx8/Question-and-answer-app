@@ -6,16 +6,14 @@ import QuestionCard from "@/components/QuestionCard.vue";
 import AnswerCard from "@/components/AnswerCard.vue";
 
 
-const props = defineProps({
-  questionId: {type: String, required: true}
-})
+const props = defineProps({id: {type: String, required: true}})
 
 const question = reactive({} as Question)
 onMounted(async () => await loadQuestionInfo())
 onBeforeUpdate(async () => await loadQuestionInfo())
 
 async function loadQuestionInfo() {
-  const response = await api.questionsApi.getQuestion(parseInt(props.questionId))
+  const response = await api.questionsApi.getQuestion(parseInt(props.id))
   Object.assign(question, response.data)
 }
 

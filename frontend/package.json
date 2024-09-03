@@ -5,7 +5,7 @@
     "dev": "npm run openapi-generate-questions && npm run openapi-generate-users && vite",
     "build": "vue-tsc --noEmit && vite build",
     "openapi-generate-questions": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8082/questions/v3/api-docs -g typescript-axios -o src/api/generated/questions",
-    "openapi-generate-users" : "npx @openapitools/openapi-generator-cli generate -i http://localhost:8082/users/v3/api-docs -g typescript-axios -o src/api/generated/users",
+    "openapi-generate-users": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8082/users/v3/api-docs -g typescript-axios -o src/api/generated/users",
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
@@ -15,6 +15,7 @@
     "axios": "^1.7.4",
     "core-js": "^3.37.1",
     "keycloak-js": "^25.0.4",
+    "pinia": "^2.2.2",
     "roboto-fontface": "*",
     "vue": "^3.4.31",
     "vuetify": "^3.6.11"

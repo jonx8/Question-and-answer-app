@@ -4,6 +4,7 @@ import router from "@/router";
 import {inject} from "vue";
 import Keycloak from "keycloak-js";
 import api from "@/api";
+import {useUserStore} from "@/store/user";
 
 
 export function useKeycloak(): Keycloak {
@@ -36,5 +37,6 @@ export const kcOptions: VueKeycloakOptions = {
         next()
       }
     })
+    useUserStore().userProfile.id = keycloak.subject ?? ""
   }
 }

@@ -1,24 +1,21 @@
 <script setup lang="ts">
 
-import {onBeforeUpdate, onMounted, reactive, ref, watch} from "vue";
+import {onBeforeUpdate, onMounted, ref, watch} from "vue";
 import api from "@/api";
 import QuestionCard from "@/components/QuestionCard.vue";
 import {useKeycloak} from "@/plugins/keycloak";
 import {Answer, QuestionHeader} from "@/api/generated/questions";
 import AnswerCard from "@/components/AnswerCard.vue";
+import {useUserStore} from "@/store/user";
+import {UserRepresentation} from "@/api/generated/users";
 
 const keycloak = useKeycloak()
-
+const props = defineProps({id: {type: String, required: false}})
 const selectedBlock = ref('questions')
 const questions = ref([] as QuestionHeader[])
 const answers = ref([] as Answer[])
-const userProfile = reactive({
-  id: '',
-  username: '',
-  email: '',
-  firstName: '',
-  lastName: '',
-})
+const userStore = useUserStore()
+const userProfile = ref({} as UserRepresentation)
 
 watch(selectedBlock, async (value) => {
   if (value == 'questions') {
@@ -28,36 +25,45 @@ watch(selectedBlock, async (value) => {
   }
 })
 
-
 onMounted(async () => {
-  await loadUserData();
-  await loadUserQuestions()
+  await loadUserData()
 })
 
 onBeforeUpdate(async () => {
-  await loadUserData();
-  await loadUserQuestions();
+  if (selectedBlock.value == "questions") {
+    await loadUserQuestions()
+  } else {
+    await loadUserAnswers()
+  }
 })
 
-
 async function loadUserData() {
-  Object.assign(userProfile, await keycloak.loadUserProfile())
+  const userId = props.id || userStore.userProfile.id
+  if (userId) {
+    const response = await api.usersApi.getUserInfo(userId)
+    userProfile.value = response.data
+  } else {
+    setTimeout(loadUserData, 1000)
+  }
 }
 
 async function loadUserQuestions() {
-  const response = await api.questionsApi.getQuestions(userProfile.id)
-  questions.value = response.data
-
+  if (userProfile.value.id) {
+    const response = await api.questionsApi.getQuestions(userProfile.value.id)
+    questions.value = response.data
+  }
 }
 
 async function loadUserAnswers() {
-  const response = await api.answersApi.getAnswersByAuthor(userProfile.id)
-  answers.value = response.data
+  if (userProfile.value.id) {
+    const response = await api.answersApi.getAnswersByAuthor(userProfile.value.id)
+    answers.value = response.data
+  }
 }
 </script>
 
 <template>
-  <v-container v-if="keycloak.authenticated">
+  <v-container v-if="keycloak.authenticated" :key="userProfile.id">
     <v-card flat class="d-flex">
       <v-img
         rounded="circle"
@@ -68,6 +74,7 @@ async function loadUserAnswers() {
       ></v-img>
       <v-container>
         <v-card-title class="cursor-pointer">
+          {{ userStore.userProfile.firstName }}
           {{ userProfile.firstName }} {{ userProfile.lastName }}
         </v-card-title>
         <v-card-subtitle>@{{ userProfile.username }}</v-card-subtitle>
