@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onBeforeUpdate, onMounted, reactive} from "vue";
 import api from "@/api";
-import {Question} from "@/api/generated";
+import {Question} from "@/api/generated/questions";
 import QuestionCard from "@/components/QuestionCard.vue";
 import AnswerCard from "@/components/AnswerCard.vue";
 

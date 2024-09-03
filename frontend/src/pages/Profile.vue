@@ -4,7 +4,7 @@ import {onBeforeUpdate, onMounted, reactive, ref, watch} from "vue";
 import api from "@/api";
 import QuestionCard from "@/components/QuestionCard.vue";
 import {useKeycloak} from "@/plugins/keycloak";
-import {Answer, QuestionHeader} from "@/api/generated";
+import {Answer, QuestionHeader} from "@/api/generated/questions";
 import AnswerCard from "@/components/AnswerCard.vue";
 
 const keycloak = useKeycloak()
@@ -39,7 +39,6 @@ onBeforeUpdate(async () => {
   await loadUserQuestions();
 })
 
-keycloak.loadUserProfile()
 
 async function loadUserData() {
   Object.assign(userProfile, await keycloak.loadUserProfile())

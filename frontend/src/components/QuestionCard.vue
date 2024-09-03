@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type {Question} from "@/api/generated";
+import type {Question} from "@/api/generated/questions";
 import {useKeycloak} from "@/plugins/keycloak";
 
 const keycloak = useKeycloak()

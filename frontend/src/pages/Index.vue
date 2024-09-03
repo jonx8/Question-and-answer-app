@@ -3,7 +3,7 @@
 import QuestionCard from "@/components/QuestionCard.vue";
 import {onBeforeUpdate, onMounted, ref} from "vue";
 import api from "@/api";
-import {QuestionHeader} from "@/api/generated";
+import {QuestionHeader} from "@/api/generated/questions";
 
 const questions = ref([] as QuestionHeader[])
 onMounted(async () => await loadQuestions())

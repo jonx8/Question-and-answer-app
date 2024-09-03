@@ -2,9 +2,10 @@
   "name": "frontend",
   "version": "0.0.0",
   "scripts": {
-    "dev": "npm run openapi-generate && vite",
+    "dev": "npm run openapi-generate-questions && npm run openapi-generate-users && vite",
     "build": "vue-tsc --noEmit && vite build",
-    "openapi-generate": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8080/api-docs -g typescript-axios -o src/api/generated",
+    "openapi-generate-questions": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8082/questions/v3/api-docs -g typescript-axios -o src/api/generated/questions",
+    "openapi-generate-users" : "npx @openapitools/openapi-generator-cli generate -i http://localhost:8082/users/v3/api-docs -g typescript-axios -o src/api/generated/users",
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore"
   },

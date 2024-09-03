@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Answer} from "@/api/generated";
+import {Answer} from "@/api/generated/questions";
 import {KeycloakProfile} from "keycloak-js";
 
 withDefaults(defineProps<{
