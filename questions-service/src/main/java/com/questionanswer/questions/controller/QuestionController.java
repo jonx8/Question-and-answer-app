@@ -152,7 +152,7 @@ public class QuestionController {
             ))
     })
     public ResponseEntity<Question> addAnswer(@PathVariable Long id,
-                                              @RequestBody CreateAnswerDto dto,
+                                              @Valid @RequestBody CreateAnswerDto dto,
                                               JwtAuthenticationToken accessToken,
                                               UriComponentsBuilder uriComponentsBuilder) {
         return ResponseEntity
