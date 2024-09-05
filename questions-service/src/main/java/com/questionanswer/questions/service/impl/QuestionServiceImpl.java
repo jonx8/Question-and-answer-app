@@ -85,6 +85,9 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getAuthor().equals(authorId)) {
             throw new AccessDeniedException("You can not to add an answer to your own question");
         }
+        if (question.getAnswers().stream().anyMatch(answer -> answer.getAuthor().equals(authorId))) {
+            throw new AccessDeniedException("You can have the only one answer for each question");
+        }
         question.getAnswers().add(new Answer(null, answerText, authorId, question, Instant.now()));
         return questionRepository.save(question);
     }
