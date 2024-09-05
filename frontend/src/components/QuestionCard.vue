@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type {Question} from "@/api/generated/questions";
 import {useKeycloak} from "@/plugins/keycloak";
+import NewAnswerDialog from "@/components/NewAnswerDialog.vue";
+import {onBeforeUpdate, onUpdated} from "vue";
 
 const keycloak = useKeycloak()
-defineProps<{ question: Question, withLink: Boolean }>()
-
+defineProps<{ question: Question, withLink: boolean }>()
 
 </script>
 
@@ -20,7 +21,7 @@ defineProps<{ question: Question, withLink: Boolean }>()
         <span v-else>{{ question.title }}</span>
       </v-card-title>
       <v-card-actions v-if="question.author != keycloak.subject">
-        <v-btn prepend-icon="mdi-pencil">Answer</v-btn>
+        <v-btn prepend-icon="mdi-pencil">Answer<NewAnswerDialog :question="question"/></v-btn>
       </v-card-actions>
     </v-container>
     <v-card-text class="text-red " v-if="question.status != 'PUBLISHED'">
@@ -31,6 +32,3 @@ defineProps<{ question: Question, withLink: Boolean }>()
 
   </v-card>
 </template>
-
-<style scoped>
-</style>
