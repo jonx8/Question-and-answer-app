@@ -11,6 +11,7 @@ declare module 'vue' {
     AppBar: typeof import('./src/components/AppBar.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     NewAnswerDialog: typeof import('./src/components/NewAnswerDialog.vue')['default']
+    NewQuestionDialog: typeof import('./src/components/NewQuestionDialog.vue')['default']
     QuestionCard: typeof import('./src/components/QuestionCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

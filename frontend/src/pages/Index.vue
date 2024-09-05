@@ -4,15 +4,22 @@ import QuestionCard from "@/components/QuestionCard.vue";
 import {onBeforeUpdate, onMounted, ref} from "vue";
 import api from "@/api";
 import {QuestionHeader} from "@/api/generated/questions";
+import NewQuestionDialog from "@/components/NewQuestionDialog.vue";
+import {useUserStore} from "@/store/user";
 
 const questions = ref([] as QuestionHeader[])
-onMounted(async () => await loadQuestions())
-onBeforeUpdate(async () => await loadQuestions())
+const userStore = useUserStore()
+onMounted(loadQuestions)
+onBeforeUpdate(loadQuestions)
 
 
 async function loadQuestions() {
-  const response = await api.questionsApi.getQuestions()
-  questions.value = response.data
+  if (userStore.userProfile.id) {
+    const response = await api.questionsApi.getQuestions()
+    questions.value = response.data
+  } else {
+    setTimeout(loadQuestions, 500)
+  }
 }
 
 </script>
@@ -20,7 +27,11 @@ async function loadQuestions() {
 <template>
 
   <v-container class="d-flex flex-column align-center mt-5">
-    <h2 class="align-center">Feed</h2>
+    <h2 class="pa-0">Feed</h2>
+    <v-btn class="align-self-end">New question
+      <NewQuestionDialog/>
+    </v-btn>
+
     <QuestionCard :with-link="true"
                   v-for="question in questions" :key="question.id"
                   :question="question"

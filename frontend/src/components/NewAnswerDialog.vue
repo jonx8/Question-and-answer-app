@@ -25,7 +25,7 @@ async function onPostClick() {
     <template v-slot:default="{ isActive }">
       <v-card class="pa-6">
         <v-card-title>New answer</v-card-title>
-        <v-card-subtitle class="">{{ question.title }}</v-card-subtitle>
+        <v-card-subtitle>{{ question.title }}</v-card-subtitle>
 
         <v-textarea placeholder="Write your answer" no-resize v-model="answerText"/>
         <template v-slot:actions>
