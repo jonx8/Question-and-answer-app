@@ -1,7 +1,7 @@
 package com.questionanswer.questions.controller;
 
 
-import com.questionanswer.questions.controller.dto.AnswerDto;
+import com.questionanswer.questions.controller.dto.CreateAnswerDto;
 import com.questionanswer.questions.controller.dto.QuestionDto;
 import com.questionanswer.questions.controller.dto.QuestionHeader;
 import com.questionanswer.questions.controller.dto.UpdateStatusDto;
@@ -152,7 +152,7 @@ public class QuestionController {
             ))
     })
     public ResponseEntity<Question> addAnswer(@PathVariable Long id,
-                                              @RequestBody AnswerDto dto,
+                                              @RequestBody CreateAnswerDto dto,
                                               JwtAuthenticationToken accessToken,
                                               UriComponentsBuilder uriComponentsBuilder) {
         return ResponseEntity

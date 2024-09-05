@@ -1,6 +1,8 @@
 package com.questionanswer.questions.controller;
 
-import com.questionanswer.questions.entity.Answer;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.questionanswer.questions.controller.dto.AnswerDto;
+import com.questionanswer.questions.controller.dto.QuestionHeader;
 import com.questionanswer.questions.service.AnswerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,11 +32,20 @@ public class AnswerController {
     @Operation(summary = "Get answers by author", responses = {
             @ApiResponse(responseCode = "200", content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = Answer.class)))
+                    array = @ArraySchema(schema = @Schema(implementation = AnswerDto.class)))
             )
     })
-    public List<Answer> getAnswersByAuthor(@RequestParam String author) {
-        return answerService.getAnswersByAuthor(author);
+    public List<AnswerDto> getAnswersByAuthor(@RequestParam String author) {
+        return answerService.getAnswersByAuthor(author).stream().map(answer -> new AnswerDto(
+                answer.getId(),
+                answer.getText(),
+                answer.getAuthor(),
+                new Jackson2ObjectMapperBuilder()
+                        .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                        .build().
+                        convertValue(answer.getQuestion(), QuestionHeader.class),
+                answer.getCreatedAt())
+        ).toList();
     }
 
     @DeleteMapping("/{id}")
