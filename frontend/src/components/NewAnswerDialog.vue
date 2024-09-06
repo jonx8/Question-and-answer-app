@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {useUserStore} from "@/store/user"
 import api from "@/api";
 import {Question} from "@/api/generated/questions";
 import axios from "axios";

@@ -5,7 +5,3 @@
 <template>
   <v-footer app color="primary" height="40"/>
 </template>
-
-<style scoped>
-
-</style>

@@ -34,6 +34,3 @@ defineProps<{
   </v-card>
 </template>
 
-<style scoped>
-
-</style>

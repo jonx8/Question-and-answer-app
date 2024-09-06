@@ -27,6 +27,3 @@ async function loadUserData() {
   <AppFooter/>
 </template>
 
-<style scoped>
-
-</style>

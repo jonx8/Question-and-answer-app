@@ -54,7 +54,6 @@ async function onPostClick() {
             @click="isActive.value = false; onPostClick()"
           ></v-btn>
         </template>
-
       </v-card>
     </template>
   </v-dialog>

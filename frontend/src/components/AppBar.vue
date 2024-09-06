@@ -41,7 +41,3 @@ async function logout() {
     <v-btn icon="mdi-export" v-if="keycloak.authenticated" @click="logout()"/>
   </v-toolbar>
 </template>
-
-<style>
-
-</style>

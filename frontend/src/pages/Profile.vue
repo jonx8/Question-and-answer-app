@@ -74,7 +74,6 @@ async function loadUserAnswers() {
       ></v-img>
       <v-container>
         <v-card-title class="cursor-pointer">
-          {{ userStore.userProfile.firstName }}
           {{ userProfile.firstName }} {{ userProfile.lastName }}
         </v-card-title>
         <v-card-subtitle>@{{ userProfile.username }}</v-card-subtitle>
@@ -108,7 +107,3 @@ async function loadUserAnswers() {
   </v-container>
 
 </template>
-
-<style scoped>
-
-</style>
