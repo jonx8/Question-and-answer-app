@@ -17,7 +17,7 @@ services:
     volumes:
       - ~/certs/private.pem:/opt/keycloak/keycloak.key.pem
       - ~/certs/cert.crt/:/opt/keycloak/keycloak.crt.pem
-      - ./question-and-answer-app-realm.json:/opt/keycloak/data/import/realm-export.json
+      - ./config/keycloak/question-and-answer-app-realm.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "8180:8080"
       - "8443:8443"

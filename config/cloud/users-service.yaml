@@ -1,0 +1,27 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+  swagger-ui:
+    oauth:
+      client-id: users-service-swagger
+      use-pkce-with-authorization-code-grant: true
+
+
+keycloak:
+  clientId: admin-cli
+  clientSecret: ${KEYCLOAK_SECRET}
+  realm: question-and-answer-app
+  url: http://localhost:8180

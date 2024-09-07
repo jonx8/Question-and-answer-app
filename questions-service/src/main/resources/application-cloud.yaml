@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: questions-service
+
+  cloud:
+    config:
+      uri: http://localhost:8888
+
+  config:
+    import: 'optional:configserver:'
