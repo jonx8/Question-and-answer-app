@@ -16,6 +16,7 @@ public class SecurityBeans {
         return httpSecurity
                 .authorizeHttpRequests(config -> config
                         .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                 )

@@ -1,6 +1,19 @@
 version: '3.9'
 
 services:
+  keycloak-db:
+    container_name: keycloak-db
+    image: postgres:16.3
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: keycloak
+    restart: on-failure
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - qa-app-net
+
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:23.0.0
@@ -19,25 +32,81 @@ services:
       - ~/certs/cert.crt/:/opt/keycloak/keycloak.crt.pem
       - ./config/keycloak/question-and-answer-app-realm.json:/opt/keycloak/data/import/realm-export.json
     ports:
-      - "8180:8080"
+      - "8080:8080"
       - "8443:8443"
     depends_on:
       - keycloak-db
     networks:
       - qa-app-net
 
-  keycloak-db:
-    container_name: keycloak-db
-    image: postgres:16.3
+  config-server:
+    container_name: config-server
+    build:
+      args:
+        JAR_FILE: ./config-server/build/libs/*.jar
+      dockerfile: Dockerfile
+    image: qa-app-config-server
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: keycloak
-    restart: on-failure
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/app/config/{application}/{profile}
     volumes:
-      - keycloak-db-data:/var/lib/postgresql/data
+      - ./config/cloud:/app/config
+    healthcheck:
+      test: "wget -T5 -qO- http://localhost:8888/actuator/health | grep UP || exit 1"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - qa-app-net
+    restart: on-failure
+
+  eureka-server:
+    container_name: eureka-server
+    build:
+      args:
+        JAR_FILE: ./eureka-server/build/libs/*.jar
+      dockerfile: Dockerfile
+    image: qa-app-eureka-server
+    environment:
+      SPRING_PROFILES_ACTIVE: cloud
+    networks:
+      - qa-app-net
+    healthcheck:
+      test: "wget -T5 -qO- http://localhost:8761/actuator/health | grep UP || exit 1"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      config-server:
+        condition: service_healthy
+    restart: always
+
+  questions-service:
+    container_name: questions-service
+    build:
+      args:
+        JAR_FILE: ./questions-service/build/libs/*.jar
+      dockerfile: Dockerfile
+    image: qa-app-questions-service
+    environment:
+      SPRING_PROFILES_ACTIVE: cloud
+    healthcheck:
+      test: "wget -T5 -qO- http://localhost:8080/actuator/health | grep UP || exit 1"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      questions-db:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - qa-app-net
+    restart: always
 
   questions-db:
     container_name: questions-db
@@ -46,11 +115,53 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: questions
-    ports:
-      - "5432:5432"
     restart: on-failure
     volumes:
       - questions-db-data:/var/lib/postgresql/data
+    networks:
+      - qa-app-net
+
+  users-service:
+    container_name: users-service
+    build:
+      args:
+        JAR_FILE: ./users-service/build/libs/*.jar
+      dockerfile: Dockerfile
+    image: qa-app-users-service
+    environment:
+      SPRING_PROFILES_ACTIVE: cloud
+    healthcheck:
+      test: "wget -T5 -qO- http://localhost:8081/actuator/health | grep UP || exit 1"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    restart: always
+    networks:
+      - qa-app-net
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      args:
+        JAR_FILE: ./api-gateway/build/libs/*.jar
+      dockerfile: Dockerfile
+    image: qa-app-api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: cloud
+    ports:
+      - "8082:8082"
+    depends_on:
+      questions-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+    restart: always
     networks:
       - qa-app-net
 

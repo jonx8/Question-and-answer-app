@@ -25,7 +25,6 @@ springdoc:
       client-id: users-service-swagger
       use-pkce-with-authorization-code-grant: true
 
-
 keycloak:
   clientId: admin-cli
   clientSecret: ${KEYCLOAK_SECRET}
