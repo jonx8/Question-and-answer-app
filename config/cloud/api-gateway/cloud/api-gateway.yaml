@@ -40,7 +40,7 @@ spring:
           predicates:
             - Path=/api/users/**
 
-        - id: questions-service-openapi-route
+        - id: users-service-openapi-route
           uri: lb://users-service
           predicates:
             - Path=/users/v3/api-docs
@@ -58,3 +58,9 @@ eureka:
 springdoc:
   swagger-ui:
     enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
