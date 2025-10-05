@@ -18,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @SecurityRequirement(name = "keycloak")
-@CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {

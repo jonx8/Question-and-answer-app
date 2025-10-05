@@ -22,7 +22,6 @@ import java.util.List;
 
 @RestController
 @SecurityRequirement(name = "keycloak")
-@CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/answers")
 @RequiredArgsConstructor
 public class AnswerController {
