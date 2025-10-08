@@ -70,7 +70,7 @@ public class QuestionServiceImpl implements QuestionService {
     public Question updateQuestion(Long id, QuestionDto dto, JwtAuthenticationToken accessToken) {
         Question question = questionRepository.findById(id).orElseThrow();
         if (!hasFullAccess(accessToken, question.getAuthor())) {
-            throw new AccessDeniedException("You can not to delete this question");
+            throw new AccessDeniedException("You can not to update this question");
         }
         question.setTitle(dto.title());
         question.setText(dto.text());
