@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+
+keycloak:
+  clientId: admin-cli
+  clientSecret: test
+  realm: question-and-answer-app
+  url: localhost:8180
