@@ -1,14 +1,14 @@
 package com.questionanswer.questions;
 
+import com.questionanswer.questions.controller.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 
 @SpringBootTest
-class QuestionsServiceApplicationTests {
+class QuestionsServiceApplicationTests extends BaseIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

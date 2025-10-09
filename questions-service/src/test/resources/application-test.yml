@@ -1,0 +1,20 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: true
+
+  liquibase:
+    drop-first: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+eureka:
+  client:
+    enabled: false
