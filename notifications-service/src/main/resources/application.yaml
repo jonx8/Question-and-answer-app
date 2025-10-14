@@ -1,0 +1,16 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notifications-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    name: ${DB_NAME:notifications}
+    username: ${DB_USER:notifications_user}
+    password: ${DB_PASSWORD:password}
+    url: jdbc:postgresql://${DB_HOST:qa-app-db}:${DB_PORT:5432}/${spring.datasource.name}
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml

@@ -98,7 +98,7 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-      questions-db:
+      qa-app-db:
         condition: service_started
       keycloak:
         condition: service_started
@@ -106,16 +106,16 @@ services:
       - qa-app-net
     restart: always
 
-  questions-db:
-    container_name: questions-db
+  qa-app-db:
+    container_name: qa-app-db
     image: postgres:16.3
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: questions
     restart: on-failure
     volumes:
-      - questions-db-data:/var/lib/postgresql/data
+      - qa-db-data:/var/lib/postgresql/data
+      - ./config/postgres/init:/docker-entrypoint-initdb.d
     networks:
       - qa-app-net
 
@@ -143,6 +143,28 @@ services:
     networks:
       - qa-app-net
 
+  notifications-service:
+    container_name: notifications-service
+    build:
+      args:
+        JAR_FILE: ./notifications-service/build/libs/*.jar
+      dockerfile: Dockerfile
+    image: qa-app-notifications-service
+    healthcheck:
+      test: "wget -T5 -qO- http://localhost:8083/actuator/health | grep UP || exit 1"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      qa-app-db:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - qa-app-net
+    restart: always
+
   api-gateway:
     container_name: api-gateway
     build:
@@ -164,7 +186,7 @@ services:
       - qa-app-net
 
 volumes:
-  questions-db-data:
+  qa-db-data:
   keycloak-db-data:
 
 networks:

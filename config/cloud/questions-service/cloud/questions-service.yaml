@@ -1,10 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    name: questions
-    username: postgres
-    password: postgres
-    url: jdbc:postgresql://questions-db:5432/questions
+    username: questions_user
+    password: password
+    url: jdbc:postgresql://qa-app-db:5432/questions
 
   jpa:
     hibernate:
