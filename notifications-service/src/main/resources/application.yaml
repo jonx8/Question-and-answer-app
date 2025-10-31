@@ -10,7 +10,25 @@ spring:
     name: ${DB_NAME:notifications}
     username: ${DB_USER:notifications_user}
     password: ${DB_PASSWORD:password}
-    url: jdbc:postgresql://${DB_HOST:qa-app-db}:${DB_PORT:5432}/${spring.datasource.name}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${spring.datasource.name}
+
+  jdbc:
+    template:
+      fetch-size: 100
 
   liquibase:
+    drop-first: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  notifications:
+    cleanup:
+      cron: "0 0 2 * * ?"
+      retention-days: 1
+      enabled: true

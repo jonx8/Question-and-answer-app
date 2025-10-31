@@ -29,6 +29,7 @@ allprojects {
 
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
+        implementation("org.apache.commons:commons-lang3:3.18.0")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         developmentOnly("org.springframework.boot:spring-boot-devtools")
