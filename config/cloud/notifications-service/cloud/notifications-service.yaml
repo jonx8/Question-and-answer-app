@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    name: notifications
+    username: notifications_user
+    password: password
+    url: jdbc:postgresql://qa-app-db/notifications
+
+  jdbc:
+    template:
+      fetch-size: 100
+
+  liquibase:
+    drop-first: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    oauth:
+      client-id: notifications-service-swagger
+      use-pkce-with-authorization-code-grant: true
+
+app:
+  notifications:
+    cleanup:
+      cron: "0 0 2 * * ?"
+      retention-days: 1
+      enabled: true
+
+keycloak:
+  url: http://keycloak:8080
+  realm: questions-and-answers-app

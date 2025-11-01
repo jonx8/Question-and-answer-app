@@ -26,6 +26,11 @@ spring:
         jwt:
           issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
 springdoc:
   api-docs:
     path: /v3/api-docs
