@@ -1,0 +1,14 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notifications-service
+
+  cloud:
+    config:
+      uri: http://config-server:8888
+      fail-fast: true
+
+  config:
+    import: 'configserver:'

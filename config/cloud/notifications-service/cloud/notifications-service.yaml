@@ -1,15 +1,14 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    username: questions_user
+    name: notifications
+    username: notifications_user
     password: password
-    url: jdbc:postgresql://qa-app-db:5432/questions
+    url: jdbc:postgresql://qa-app-db/notifications
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: true
-
+  jdbc:
+    template:
+      fetch-size: 100
 
   liquibase:
     drop-first: true
@@ -20,6 +19,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
+
 eureka:
   client:
     serviceUrl:
@@ -31,9 +31,16 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     oauth:
-      client-id: questions-service-swagger
+      client-id: notifications-service-swagger
       use-pkce-with-authorization-code-grant: true
+
+app:
+  notifications:
+    cleanup:
+      cron: "0 0 2 * * ?"
+      retention-days: 1
+      enabled: true
 
 keycloak:
   url: http://keycloak:8080
-  realm: question-and-answer-app
+  realm: questions-and-answers-app
