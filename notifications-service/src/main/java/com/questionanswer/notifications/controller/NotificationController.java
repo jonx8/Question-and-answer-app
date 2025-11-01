@@ -7,6 +7,7 @@ import com.questionanswer.notifications.controller.dto.UpdateNotificationRequest
 import com.questionanswer.notifications.entity.Notification;
 import com.questionanswer.notifications.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/notifications")
+@SecurityRequirement(name = "keycloak")
 @RequiredArgsConstructor
 @Tag(name = "Notifications")
 public class NotificationController {

@@ -20,11 +20,20 @@ spring:
     drop-first: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    oauth:
+      client-id: notifications-service-swagger
+      use-pkce-with-authorization-code-grant: true
 
 app:
   notifications:
@@ -32,3 +41,7 @@ app:
       cron: "0 0 2 * * ?"
       retention-days: 1
       enabled: true
+
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8180}
+  realm: ${KEYCLOAK_REALM:question-and-answer-app}
