@@ -8,11 +8,11 @@ import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.entity.QuestionStatus;
 import com.questionanswer.questions.repository.QuestionRepository;
 import com.questionanswer.questions.service.QuestionService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
@@ -75,7 +76,7 @@ public class QuestionServiceImpl implements QuestionService {
         question.setTitle(dto.title());
         question.setText(dto.text());
         question.setStatus(dto.status());
-        return questionRepository.save(question);
+        return question;
     }
 
     @Override
@@ -89,7 +90,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new AccessDeniedException("You can have the only one answer for each question");
         }
         question.getAnswers().add(new Answer(null, answerText, authorId, question, Instant.now()));
-        return questionRepository.save(question);
+        return question;
     }
 
     @Override
