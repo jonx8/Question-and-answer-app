@@ -11,10 +11,14 @@ spring:
         jwt:
           issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
 
+  cloud:
+    config:
+      enabled: false
+
+
 eureka:
   client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+    enabled: false
 
 springdoc:
   api-docs:
