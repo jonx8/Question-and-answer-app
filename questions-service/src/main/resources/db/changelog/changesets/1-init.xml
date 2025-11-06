@@ -15,13 +15,10 @@
             <column name="text" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="author" type="varchar(100)">
+            <column name="author" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="varchar(30)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="current_timestamp">
+            <column name="created_at" type="timestamptz" defaultValueComputed="current_timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -39,10 +36,10 @@
                              nullable="false"
                 />
             </column>
-            <column name="author" type="varchar(100)">
+            <column name="author" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="current_timestamp">
+            <column name="created_at" type="timestamptz" defaultValueComputed="current_timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>

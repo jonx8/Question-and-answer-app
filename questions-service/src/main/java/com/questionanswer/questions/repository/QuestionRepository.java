@@ -1,15 +1,15 @@
 package com.questionanswer.questions.repository;
 
 import com.questionanswer.questions.entity.Question;
-import com.questionanswer.questions.entity.QuestionStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.ListPagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findAllByStatusOrderByCreatedAtDesc(QuestionStatus status);
-    List<Question> findAllByAuthorOrderByCreatedAtDesc(String author);
-    List<Question> findAllByAuthorAndStatusOrderByCreatedAtDesc(String author, QuestionStatus status);
+public interface QuestionRepository extends JpaRepository<Question, Long>, ListPagingAndSortingRepository<Question, Long> {
+    Page<Question> findAllByAuthorOrderByCreatedAtDesc(UUID author, Pageable pageable);
 }

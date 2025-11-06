@@ -10,16 +10,21 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.NoSuchElementException;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNotFound(NoSuchElementException exception) {
+    @ExceptionHandler({AnswerNotFoundException.class, QuestionNotFoundException.class})
+    public ResponseEntity<ProblemDetail> handleNotFound(RuntimeException exception) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage()));
+    }
+
+    @ExceptionHandler({AnswerAlreadyExistsException.class, AnswerOwnQuestionException.class})
+    public ResponseEntity<ProblemDetail> handleAnswerAlreadyExists(RuntimeException exception) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage()));
     }
 
     @ExceptionHandler(BindException.class)
