@@ -17,7 +17,7 @@ class QuestionControllerIT extends BaseIntegrationTest {
 
     @Test
     @Sql("/sql/questions.sql")
-    void getPublishedQuestions_ReturnsPublishedQuestions() throws Exception {
+    void getAllQuestions_ReturnsAllQuestions() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .get(PATH_PREFIX)
                 .with(jwt());
@@ -26,9 +26,7 @@ class QuestionControllerIT extends BaseIntegrationTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.length()").value(2),
-                        jsonPath("$[0].id").value(TestConstants.QUESTION_ID_1),
-                        jsonPath("$[1].id").value(TestConstants.QUESTION_ID_3)
+                        jsonPath("$.data.length()").value(4)
                 );
     }
 
@@ -37,16 +35,14 @@ class QuestionControllerIT extends BaseIntegrationTest {
     void getQuestionsByAuthor_UserIsAdmin_ReturnsAllUserQuestions() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .get(PATH_PREFIX)
-                .queryParam("author", TestConstants.ADMIN_USER_ID)
+                .queryParam("author", String.valueOf(TestConstants.ADMIN_USER_ID))
                 .with(jwt().authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)));
 
         this.mockMvc.perform(requestBuilder)
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.length()").value(2),
-                        jsonPath("$[0].id").value(TestConstants.QUESTION_ID_3),
-                        jsonPath("$[1].id").value(TestConstants.QUESTION_ID_4)
+                        jsonPath("$.data.length()").value(2)
                 );
     }
 
@@ -55,9 +51,9 @@ class QuestionControllerIT extends BaseIntegrationTest {
     void getQuestionsByAuthor_UserIsAuthor_ReturnsOwnQuestions() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .get(PATH_PREFIX)
-                .queryParam("author", TestConstants.ADMIN_USER_ID)
+                .queryParam("author", String.valueOf(TestConstants.ADMIN_USER_ID))
                 .with(jwt()
-                        .jwt(jwt -> jwt.subject(TestConstants.ADMIN_USER_ID))
+                        .jwt(jwt -> jwt.subject(String.valueOf(TestConstants.ADMIN_USER_ID)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER))
                 );
 
@@ -65,9 +61,7 @@ class QuestionControllerIT extends BaseIntegrationTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.length()").value(2),
-                        jsonPath("$[0].id").value(TestConstants.QUESTION_ID_3),
-                        jsonPath("$[1].id").value(TestConstants.QUESTION_ID_4)
+                        jsonPath("$.data.length()").value(2)
                 );
     }
 
@@ -77,7 +71,7 @@ class QuestionControllerIT extends BaseIntegrationTest {
         var requestBuilder = MockMvcRequestBuilders
                 .get(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
                 .with(jwt()
-                        .jwt(jwt -> jwt.subject(TestConstants.ADMIN_USER_ID))
+                        .jwt(jwt -> jwt.subject(String.valueOf(TestConstants.ADMIN_USER_ID)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER))
                 );
 
@@ -87,9 +81,8 @@ class QuestionControllerIT extends BaseIntegrationTest {
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
                         jsonPath("$.title").value("Question title"),
                         jsonPath("$.text").value("Far far away, behind"),
-                        jsonPath("$.author").value(TestConstants.USER_ID_1),
+                        jsonPath("$.author").value(TestConstants.USER_ID_1.toString()),
                         jsonPath("$.answers.length()").value(1),
-                        jsonPath("$.status").value("PUBLISHED"),
                         jsonPath("$.createdAt").isString()
                 );
     }
@@ -108,19 +101,18 @@ class QuestionControllerIT extends BaseIntegrationTest {
     @Test
     void createQuestion_ValidData_ReturnsCreatedQuestion() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.post(PATH_PREFIX)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.ADMIN_USER_ID)))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.ADMIN_USER_ID))))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"title":  "New Question", "text": "Something new", "status": "DRAFT"}""");
+                        {"title":  "New Question", "text": "Something new"}""");
 
         this.mockMvc.perform(requestBuilder)
                 .andExpectAll(
                         status().isCreated(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.id").value(1),
+                        jsonPath("$.id").exists(),
                         jsonPath("$.title").value("New Question"),
-                        jsonPath("$.status").value("DRAFT"),
-                        jsonPath("$.author").value(TestConstants.ADMIN_USER_ID),
+                        jsonPath("$.author").value(TestConstants.ADMIN_USER_ID.toString()),
                         jsonPath("$.answers").isArray(),
                         jsonPath("$.answers").isEmpty(),
                         jsonPath("$.createdAt").isString()
@@ -128,29 +120,32 @@ class QuestionControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    void createQuestion_InvalidStatus_ReturnsBadRequest() throws Exception {
+    void createQuestion_InvalidData_ReturnsBadRequest() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.post(PATH_PREFIX)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.ADMIN_USER_ID)))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.ADMIN_USER_ID))))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"title":  "New Question", "text": "Something new", "status": "NEW"}""");
+                        {"title": "   ", "text": "Something new"}""");
 
         this.mockMvc.perform(requestBuilder)
-                .andExpectAll(status().isBadRequest());
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+                );
     }
 
     @Test
     void createQuestion_MissingText_ReturnsBadRequest() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.post(PATH_PREFIX)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.ADMIN_USER_ID)))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.ADMIN_USER_ID))))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"title":  "New Question", "status": "DRAFT"}""");
+                        {"title":  "New Question"}""");
 
         this.mockMvc.perform(requestBuilder)
                 .andExpectAll(
                         status().isBadRequest(),
-                        content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                        content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
                 );
     }
 
@@ -158,30 +153,65 @@ class QuestionControllerIT extends BaseIntegrationTest {
     @Sql("/sql/questions.sql")
     void updateQuestion_UserIsAdminAndValidData_ReturnsUpdatedQuestion() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.put(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_2)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"title": "How i met your mother?", "text" : "Hello, world!", "status": "PUBLISHED"}""");
+                        {"title": "How i met your mother?", "text": "Hello, world!"}""");
 
         this.mockMvc.perform(requestBuilder)
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        content().json("""
-                                {"id": 2, "title": "How i met your mother?", "text" : "Hello, world!", "status": "PUBLISHED", answers: []}""")
+                        jsonPath("$.id").value(TestConstants.QUESTION_ID_2),
+                        jsonPath("$.title").value("How i met your mother?"),
+                        jsonPath("$.text").value("Hello, world!"),
+                        jsonPath("$.author").exists()
                 );
+    }
+
+    @Test
+    @Sql("/sql/questions.sql")
+    void updateQuestion_UserIsAuthor_ReturnsUpdatedQuestion() throws Exception {
+        var requestBuilder = MockMvcRequestBuilders.put(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
+                        .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title": "Updated Title", "text": "Updated text"}""");
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
+                        jsonPath("$.title").value("Updated Title"),
+                        jsonPath("$.text").value("Updated text")
+                );
+    }
+
+    @Test
+    @Sql("/sql/questions.sql")
+    void updateQuestion_UserNotAuthor_ReturnsForbidden() throws Exception {
+        var requestBuilder = MockMvcRequestBuilders.put(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_2)))
+                        .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title": "Updated Title", "text": "Updated text"}""");
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @Sql("/sql/questions.sql")
     void updateQuestion_InvalidTitle_ReturnsBadRequest() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.put(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_2)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"title": "How?", "text" : "Hello, world!", "status": "PUBLISHED"}""");
+                        {"title": "How?", "text": "Hello, world!"}""");
 
         this.mockMvc.perform(requestBuilder)
                 .andExpectAll(
@@ -194,11 +224,11 @@ class QuestionControllerIT extends BaseIntegrationTest {
     @Sql("/sql/questions.sql")
     void updateQuestion_QuestionNotFound_ReturnsNotFound() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.put(PATH_PREFIX + "/" + TestConstants.NON_EXISTENT_QUESTION_ID)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"title": "How i met your mother?", "text" : "Hello, world!", "status": "PUBLISHED"}""");
+                        {"title": "How i met your mother?", "text": "Hello, world!"}""");
 
         this.mockMvc.perform(requestBuilder)
                 .andExpectAll(
@@ -211,7 +241,7 @@ class QuestionControllerIT extends BaseIntegrationTest {
     @Sql("/sql/questions.sql")
     void deleteQuestion_QuestionExists_ReturnsNoContent() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.delete(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)));
 
         this.mockMvc.perform(requestBuilder)
@@ -221,8 +251,8 @@ class QuestionControllerIT extends BaseIntegrationTest {
     @Test
     @Sql("/sql/questions.sql")
     void deleteQuestion_QuestionNotFound_ReturnsNotFound() throws Exception {
-        var requestBuilder = MockMvcRequestBuilders.delete(PATH_PREFIX + "/30")
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
+        var requestBuilder = MockMvcRequestBuilders.delete(PATH_PREFIX + "/" + TestConstants.NON_EXISTENT_QUESTION_ID)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)));
 
         this.mockMvc.perform(requestBuilder)
@@ -234,66 +264,12 @@ class QuestionControllerIT extends BaseIntegrationTest {
 
     @Test
     @Sql("/sql/questions.sql")
-    void updateQuestionStatus_QuestionExists_ReturnsNoContent() throws Exception {
-        var requestBuilder = MockMvcRequestBuilders.patch(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
-                        .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {"status": "BANNED"}""");
+    void deleteQuestion_UserNotAuthor_ReturnsForbidden() throws Exception {
+        var requestBuilder = MockMvcRequestBuilders.delete(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_2)))
+                        .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER)));
 
         this.mockMvc.perform(requestBuilder)
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void updateQuestionStatus_QuestionNotFound_ReturnsNotFound() throws Exception {
-        var requestBuilder = MockMvcRequestBuilders.patch(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_1)
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
-                        .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {"status": "BANNED"}""");
-
-        this.mockMvc.perform(requestBuilder)
-                .andExpectAll(
-                        status().isNotFound(),
-                        content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
-                );
-    }
-
-    @Test
-    @Sql("/sql/questions.sql")
-    void addAnswerToQuestion_QuestionExists_ReturnsQuestionWithAnswer() throws Exception {
-        var requestBuilder = MockMvcRequestBuilders.post(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_2 + "/answer")
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_2)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {"text": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live. Vokalia and Consonantia, there live"}""");
-
-        this.mockMvc.perform(requestBuilder)
-                .andExpectAll(
-                        status().isCreated(),
-                        content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        content().json("""
-                                {"title" : "How i met your mother?", "text" :"Lorem ipsum dolor si", "status": "DRAFT"}"""),
-                        jsonPath("$.answers.length()").value(1),
-                        jsonPath("$.answers[0].author").value(TestConstants.USER_ID_2)
-                );
-    }
-
-    @Test
-    void addAnswerToQuestion_QuestionNotFound_ReturnsNotFound() throws Exception {
-        var requestBuilder = MockMvcRequestBuilders.post(PATH_PREFIX + "/" + TestConstants.QUESTION_ID_2 + "/answer")
-                .with(jwt().jwt(jwt -> jwt.subject(TestConstants.USER_ID_2)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(""" 
-                        {"text": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live. Vokalia and Consonantia, there live."}""");
-
-        this.mockMvc.perform(requestBuilder)
-                .andExpectAll(
-                        status().isNotFound(),
-                        content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
-                );
+                .andExpect(status().isForbidden());
     }
 }

@@ -4,6 +4,7 @@ package com.questionanswer.questions.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,10 +13,12 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Data
 @Table(name = "questions")
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Question implements Serializable {
@@ -30,19 +33,13 @@ public class Question implements Serializable {
     private String text;
 
     @Column(nullable = false)
-    private String author;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private QuestionStatus status;
+    private UUID author;
 
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "question")
+    @OneToMany(mappedBy = "question")
     private List<Answer> answers = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false)
     private Instant createdAt;
-
-
 }
