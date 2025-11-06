@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Builder
 @Entity
 @Table(name = "questions")
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Question implements Serializable {
@@ -35,7 +35,9 @@ public class Question implements Serializable {
     @Column(nullable = false)
     private UUID author;
 
+
     @JsonManagedReference
+    @Builder.Default
     @OneToMany(mappedBy = "question")
     private List<Answer> answers = new ArrayList<>();
 

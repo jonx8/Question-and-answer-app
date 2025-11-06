@@ -1,10 +1,7 @@
 package com.questionanswer.questions.service.impl;
 
 import com.questionanswer.questions.components.SecurityUtils;
-import com.questionanswer.questions.controller.dto.CreateQuestionRequest;
-import com.questionanswer.questions.controller.dto.PagedResponse;
-import com.questionanswer.questions.controller.dto.QuestionHeader;
-import com.questionanswer.questions.controller.dto.UpdateQuestionRequest;
+import com.questionanswer.questions.controller.dto.*;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.exception.QuestionNotFoundException;
 import com.questionanswer.questions.repository.QuestionRepository;
@@ -81,10 +78,12 @@ class QuestionServiceImplTest {
                 .thenReturn(Optional.of(testQuestion));
 
         // Act
-        Question result = questionService.getQuestion(TestConstants.QUESTION_ID_1);
+        QuestionResponse result = questionService.getQuestionWithAnswers(TestConstants.QUESTION_ID_1);
 
         // Assert
-        assertThat(result).isEqualTo(testQuestion);
+        assertThat(result.id()).isEqualTo(TestConstants.QUESTION_ID_1);
+        assertThat(result.answers()).isEmpty();
+        assertThat(result.title()).isEqualTo(TestConstants.TEST_QUESTION_TITLE);
         verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
     }
 
@@ -95,7 +94,7 @@ class QuestionServiceImplTest {
                 .thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> questionService.getQuestion(TestConstants.NON_EXISTENT_QUESTION_ID))
+        assertThatThrownBy(() -> questionService.getQuestionWithAnswers(TestConstants.NON_EXISTENT_QUESTION_ID))
                 .isInstanceOf(QuestionNotFoundException.class);
     }
 

@@ -1,10 +1,7 @@
 package com.questionanswer.questions.service.impl;
 
 import com.questionanswer.questions.components.SecurityUtils;
-import com.questionanswer.questions.controller.dto.CreateQuestionRequest;
-import com.questionanswer.questions.controller.dto.PagedResponse;
-import com.questionanswer.questions.controller.dto.QuestionHeader;
-import com.questionanswer.questions.controller.dto.UpdateQuestionRequest;
+import com.questionanswer.questions.controller.dto.*;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.exception.QuestionNotFoundException;
 import com.questionanswer.questions.mapper.PageMapper;
@@ -39,8 +36,9 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final SecurityUtils securityUtils;
 
+
     /**
-     * Retrieves a question by its ID.
+     * Retrieves a question by its ID without initialize LazyCollection of answer.
      *
      * @param id the ID of the question to retrieve
      * @return the {@link Question} entity
@@ -53,6 +51,20 @@ public class QuestionServiceImpl implements QuestionService {
             return QuestionNotFoundException.withId(id);
         });
     }
+
+    /**
+     * Retrieves a question by its ID with all answers.
+     *
+     * @param id the ID of the question to retrieve
+     * @return the {@link QuestionResponse} response
+     * @throws QuestionNotFoundException if no question exists with the specified ID
+     */
+    @Override
+    public QuestionResponse getQuestionWithAnswers(Long id) {
+        Question question = getQuestion(id);
+        return QuestionMapper.toResponse(question);
+    }
+
 
     /**
      * Retrieves a paginated list of all questions.

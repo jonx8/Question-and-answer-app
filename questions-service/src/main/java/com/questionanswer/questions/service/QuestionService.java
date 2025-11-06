@@ -1,10 +1,7 @@
 package com.questionanswer.questions.service;
 
 
-import com.questionanswer.questions.controller.dto.CreateQuestionRequest;
-import com.questionanswer.questions.controller.dto.PagedResponse;
-import com.questionanswer.questions.controller.dto.QuestionHeader;
-import com.questionanswer.questions.controller.dto.UpdateQuestionRequest;
+import com.questionanswer.questions.controller.dto.*;
 import com.questionanswer.questions.entity.Question;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -16,6 +13,8 @@ import java.util.UUID;
 public interface QuestionService {
 
     Question getQuestion(Long id);
+
+    QuestionResponse getQuestionWithAnswers(Long id);
 
     PagedResponse<QuestionHeader> getQuestions(Pageable pageable);
 

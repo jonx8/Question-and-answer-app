@@ -1,10 +1,7 @@
 package com.questionanswer.questions.controller;
 
 
-import com.questionanswer.questions.controller.dto.CreateQuestionRequest;
-import com.questionanswer.questions.controller.dto.PagedResponse;
-import com.questionanswer.questions.controller.dto.QuestionHeader;
-import com.questionanswer.questions.controller.dto.UpdateQuestionRequest;
+import com.questionanswer.questions.controller.dto.*;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,8 +40,8 @@ public class QuestionController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get question by id")
-    public Question getQuestion(@PathVariable Long id) {
-        return questionService.getQuestion(id);
+    public QuestionResponse getQuestion(@PathVariable Long id) {
+        return questionService.getQuestionWithAnswers(id);
     }
 
     @PostMapping
