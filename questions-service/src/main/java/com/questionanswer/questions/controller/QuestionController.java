@@ -1,7 +1,7 @@
 package com.questionanswer.questions.controller;
 
 
-import com.questionanswer.questions.controller.dto.*;
+import com.questionanswer.questions.dto.*;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;

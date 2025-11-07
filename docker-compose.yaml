@@ -30,12 +30,24 @@ services:
       - ~/certs/cert.crt:/opt/keycloak/keycloak.crt.pem
       - ./config/keycloak/question-and-answer-app-realm.json:/opt/keycloak/data/import/realm-export.json
     ports:
-      - "8080:8080"
+      - "8180:8080"
       - "8443:8443"
     depends_on:
       - keycloak-db
     networks:
       - qa-app-net
+
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      qa-app-net:
 
   config-server:
     container_name: config-server
@@ -100,6 +112,8 @@ services:
         condition: service_healthy
       qa-app-db:
         condition: service_started
+      rabbitmq:
+        condition: service_started
       keycloak:
         condition: service_started
     networks:
@@ -112,10 +126,12 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: questions
     restart: on-failure
+    ports:
+      - "5432:5432"
     volumes:
       - qa-db-data:/var/lib/postgresql/data
-      - ./config/postgres/init:/docker-entrypoint-initdb.d
     networks:
       - qa-app-net
 
@@ -161,13 +177,30 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-      qa-app-db:
+      rabbitmq:
+        condition: service_started
+      notifications-db:
         condition: service_started
       keycloak:
         condition: service_started
     networks:
       - qa-app-net
     restart: always
+
+  notifications-db:
+    image: mongo:8.2-noble
+    container_name: notifications-db
+    environment:
+      MONGO_INITDB_DATABASE: notifications
+      MONGO_INITDB_ROOT_USERNAME: mongodb
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    restart: on-failure
+    networks:
+      - qa-app-net
+    volumes:
+      - notifications-db-data:/data/db
 
   api-gateway:
     container_name: api-gateway
@@ -191,6 +224,7 @@ services:
 
 volumes:
   qa-db-data:
+  notifications-db-data:
   keycloak-db-data:
 
 networks:

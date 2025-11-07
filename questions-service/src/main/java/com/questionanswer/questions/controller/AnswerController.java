@@ -1,8 +1,8 @@
 package com.questionanswer.questions.controller;
 
-import com.questionanswer.questions.controller.dto.AnswerResponse;
-import com.questionanswer.questions.controller.dto.CreateAnswerRequest;
-import com.questionanswer.questions.controller.dto.PagedResponse;
+import com.questionanswer.questions.dto.AnswerResponse;
+import com.questionanswer.questions.dto.CreateAnswerRequest;
+import com.questionanswer.questions.dto.PagedResponse;
 import com.questionanswer.questions.entity.Answer;
 import com.questionanswer.questions.service.AnswerService;
 import io.swagger.v3.oas.annotations.Operation;

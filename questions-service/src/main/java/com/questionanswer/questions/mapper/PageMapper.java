@@ -1,6 +1,6 @@
 package com.questionanswer.questions.mapper;
 
-import com.questionanswer.questions.controller.dto.PagedResponse;
+import com.questionanswer.questions.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 
 import java.util.function.Function;

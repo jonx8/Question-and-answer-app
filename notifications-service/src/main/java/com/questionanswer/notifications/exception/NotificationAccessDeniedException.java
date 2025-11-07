@@ -1,10 +1,8 @@
 package com.questionanswer.notifications.exception;
 
-import java.util.UUID;
-
 public class NotificationAccessDeniedException extends RuntimeException {
 
-    public NotificationAccessDeniedException(String userId, UUID notificationId) {
+    public NotificationAccessDeniedException(String userId, String notificationId) {
         super("User " + userId + " does not have access to notification " + notificationId);
     }
 
@@ -16,7 +14,7 @@ public class NotificationAccessDeniedException extends RuntimeException {
         super(message, cause);
     }
 
-    public static NotificationAccessDeniedException forUserAndNotification(String userId, UUID notificationId) {
+    public static NotificationAccessDeniedException withUserAndNotification(String userId, String notificationId) {
         return new NotificationAccessDeniedException(userId, notificationId);
     }
 }

@@ -1,13 +1,17 @@
-package com.questionanswer.notifications.controller.dto;
+package com.questionanswer.notifications.dto;
 
 import com.questionanswer.notifications.entity.NotificationType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.Map;
 import java.util.UUID;
 
 public record CreateNotificationRequest(
+        @NotNull(message = "Actor ID is required")
+        UUID actorId,
+
         @NotNull(message = "User ID is required")
         UUID userId,
 
@@ -21,7 +25,6 @@ public record CreateNotificationRequest(
         @Size(max = 2000, message = "Message must not exceed 2000 characters")
         String message,
 
-        @Size(max = 100, message = "Related content ID must not exceed 100 characters")
-        String relatedContentId
+        Map<String, Object> relatedData
 ) {
 }

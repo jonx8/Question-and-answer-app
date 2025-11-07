@@ -1,8 +1,8 @@
 package com.questionanswer.questions.service.impl;
 
 import com.questionanswer.questions.components.SecurityUtils;
-import com.questionanswer.questions.controller.dto.AnswerResponse;
-import com.questionanswer.questions.controller.dto.PagedResponse;
+import com.questionanswer.questions.dto.AnswerResponse;
+import com.questionanswer.questions.dto.PagedResponse;
 import com.questionanswer.questions.entity.Answer;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.exception.AnswerAlreadyExistsException;

@@ -1,7 +1,7 @@
 package com.questionanswer.questions.mapper;
 
-import com.questionanswer.questions.controller.dto.QuestionHeader;
-import com.questionanswer.questions.controller.dto.QuestionResponse;
+import com.questionanswer.questions.dto.QuestionHeader;
+import com.questionanswer.questions.dto.QuestionResponse;
 import com.questionanswer.questions.entity.Question;
 
 

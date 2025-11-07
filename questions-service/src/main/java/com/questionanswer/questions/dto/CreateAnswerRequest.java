@@ -1,4 +1,4 @@
-package com.questionanswer.questions.controller.dto;
+package com.questionanswer.questions.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

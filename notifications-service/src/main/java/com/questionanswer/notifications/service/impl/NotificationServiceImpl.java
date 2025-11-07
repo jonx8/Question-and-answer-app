@@ -1,8 +1,7 @@
 package com.questionanswer.notifications.service.impl;
 
-import com.questionanswer.notifications.controller.dto.CreateNotificationRequest;
-import com.questionanswer.notifications.controller.dto.NotificationsListResponse;
-import com.questionanswer.notifications.controller.dto.UpdateNotificationRequest;
+import com.questionanswer.notifications.dto.CreateNotificationRequest;
+import com.questionanswer.notifications.dto.NotificationsListResponse;
 import com.questionanswer.notifications.entity.Notification;
 import com.questionanswer.notifications.exception.NotificationAlreadyReadException;
 import com.questionanswer.notifications.exception.NotificationNotFoundException;
@@ -14,9 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,13 +28,12 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Retrieves a notification by its identifier.
      *
-     * @param id the UUID of the notification to retrieve
+     * @param id the ID of the notification to retrieve
      * @return the found notification entity
      * @throws NotificationNotFoundException if no notification exists with the given ID
      */
     @Override
-    @Transactional(readOnly = true)
-    public Notification getNotificationById(UUID id) {
+    public Notification getNotificationById(String id) {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> NotificationNotFoundException.withId(id));
     }
@@ -50,7 +46,6 @@ public class NotificationServiceImpl implements NotificationService {
      * @param pageable pagination and sorting parameters
      * @return page of user notifications
      */
-    @Transactional(readOnly = true)
     @Override
     public NotificationsListResponse getNotificationsByUserId(UUID userId, Pageable pageable) {
         Page<Notification> page = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
@@ -72,25 +67,10 @@ public class NotificationServiceImpl implements NotificationService {
      * @param userId the UUID of the user
      * @return list of unread notifications
      */
-    @Transactional(readOnly = true)
     @Override
     public List<Notification> getUnreadNotificationsByUserId(UUID userId) {
         return notificationRepository.findByUserIdAndIsReadFalse(userId);
     }
-
-    /**
-     * Retrieves the count of unread notifications for a specific user.
-     * Primarily used for displaying unread message badges.
-     *
-     * @param userId the UUID of the user
-     * @return count of unread notifications
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public long getUnreadNotificationsCount(UUID userId) {
-        return notificationRepository.countByUserIdAndIsReadFalse(userId);
-    }
-
 
     /**
      * Creates a new notification based on the provided request data.
@@ -99,7 +79,6 @@ public class NotificationServiceImpl implements NotificationService {
      * @return the created notification entity
      */
     @Override
-    @Transactional
     public Notification createNotification(CreateNotificationRequest request) {
         Notification notification = notificationMapper.toEntity(request);
         return notificationRepository.save(notification);
@@ -110,42 +89,18 @@ public class NotificationServiceImpl implements NotificationService {
      * Throws an exception if the notification is already read.
      * Automatically updates the updatedAt timestamp
      *
-     * @param id the UUID of the notification to mark as read
+     * @param id the ID of the notification to mark as read
      * @return the updated notification entity
      * @throws NotificationAlreadyReadException if the notification is already read
      * @throws NotificationNotFoundException    if the notification doesn't exist
      */
-    @Transactional
     @Override
-    public Notification markAsRead(UUID id) {
+    public Notification markAsRead(String id) {
         Notification notification = getNotificationById(id);
         if (notification.isRead()) {
-            throw new NotificationAlreadyReadException(id);
+            throw NotificationAlreadyReadException.withId(id);
         }
         notification.markAsRead();
-        return notificationRepository.save(notification);
-    }
-
-    /**
-     * Applies partial updates to a notification.
-     * Only non-null fields from the request are updated.
-     * Automatically updates the updatedAt timestamp.
-     *
-     * @param id      the UUID of the notification to update
-     * @param request DTO containing fields to modify
-     * @return the updated notification entity
-     * @throws NotificationNotFoundException if the notification doesn't exist
-     */
-    @Transactional
-    @Override
-    public Notification updateNotification(UUID id, UpdateNotificationRequest request) {
-        if (!request.hasUpdates()) {
-            log.warn("Update request for notification {} contains no changes", id);
-            return getNotificationById(id);
-        }
-
-        Notification notification = getNotificationById(id);
-        applyUpdates(notification, request);
         return notificationRepository.save(notification);
     }
 
@@ -153,43 +108,15 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Deletes a notification by its identifier.
      *
-     * @param id the UUID of the notification to delete
+     * @param id the ID of the notification to delete
      * @throws NotificationNotFoundException if the notification doesn't exist
      */
-    @Transactional
     @Override
-    public void deleteNotification(UUID id) {
+    public void deleteNotification(String id) {
         if (!notificationRepository.existsById(id)) {
             throw NotificationNotFoundException.withId(id);
         }
         notificationRepository.deleteById(id);
     }
 
-
-    private void applyUpdates(Notification notification, UpdateNotificationRequest request) {
-        if (request.title() != null) {
-            notification.setTitle(request.title());
-        }
-
-        if (request.message() != null) {
-            notification.setMessage(request.message());
-        }
-
-        if (request.type() != null) {
-            notification.setType(request.type());
-        }
-
-        if (request.relatedContentId() != null) {
-            notification.setRelatedContentId(request.relatedContentId());
-        }
-        if (request.isRead() != null) {
-            if (request.isRead()) {
-                notification.markAsRead();
-            } else {
-                notification.markAsUnread();
-            }
-        }
-
-        notification.setUpdatedAt(Instant.now());
-    }
 }

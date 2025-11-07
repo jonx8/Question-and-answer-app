@@ -1,4 +1,4 @@
-package com.questionanswer.questions.controller.dto;
+package com.questionanswer.questions.dto;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -1,7 +1,7 @@
 package com.questionanswer.questions.service.impl;
 
 import com.questionanswer.questions.components.SecurityUtils;
-import com.questionanswer.questions.controller.dto.*;
+import com.questionanswer.questions.dto.*;
 import com.questionanswer.questions.entity.Question;
 import com.questionanswer.questions.exception.QuestionNotFoundException;
 import com.questionanswer.questions.mapper.PageMapper;
