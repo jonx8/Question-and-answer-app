@@ -133,7 +133,7 @@ class AnswerServiceImplTest {
         when(answerRepository.save(any(Answer.class))).thenReturn(testAnswer);
 
         // Act
-        Answer result = answerService.createAnswerToQuestion(
+        Answer result = answerService.createAnswer(
                 TestConstants.QUESTION_ID_1,
                 TestConstants.TEST_ANSWER_TEXT,
                 otherUserToken
@@ -153,7 +153,7 @@ class AnswerServiceImplTest {
         when(securityUtils.getCurrentUserId(questionAuthorToken)).thenReturn(TestConstants.USER_ID_2);
 
         // Act & Assert
-        assertThatThrownBy(() -> answerService.createAnswerToQuestion(
+        assertThatThrownBy(() -> answerService.createAnswer(
                 TestConstants.QUESTION_ID_1,
                 TestConstants.TEST_ANSWER_TEXT,
                 questionAuthorToken
@@ -173,7 +173,7 @@ class AnswerServiceImplTest {
                 .thenReturn(true);
 
         // Act & Assert
-        assertThatThrownBy(() -> answerService.createAnswerToQuestion(
+        assertThatThrownBy(() -> answerService.createAnswer(
                 TestConstants.QUESTION_ID_1,
                 TestConstants.TEST_ANSWER_TEXT,
                 otherUserToken

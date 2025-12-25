@@ -1,11 +1,9 @@
 package com.questionanswer.notifications.service.impl;
 
-import com.questionanswer.notifications.dto.CreateNotificationRequest;
 import com.questionanswer.notifications.dto.NotificationsListResponse;
 import com.questionanswer.notifications.entity.Notification;
 import com.questionanswer.notifications.exception.NotificationAlreadyReadException;
 import com.questionanswer.notifications.exception.NotificationNotFoundException;
-import com.questionanswer.notifications.mapper.NotificationMapper;
 import com.questionanswer.notifications.repository.NotificationRepository;
 import com.questionanswer.notifications.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
-    private final NotificationMapper notificationMapper;
 
 
     /**
@@ -73,14 +70,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * Creates a new notification based on the provided request data.
+     * Creates a new notification.
      *
-     * @param request DTO containing notification creation data
-     * @return the created notification entity
+     * @param notification the notification entity to create
+     * @return the created notification with generated ID
      */
     @Override
-    public Notification createNotification(CreateNotificationRequest request) {
-        Notification notification = notificationMapper.toEntity(request);
+    public Notification createNotification(Notification notification) {
         return notificationRepository.save(notification);
     }
 

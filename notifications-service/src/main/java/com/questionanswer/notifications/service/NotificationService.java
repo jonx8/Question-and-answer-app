@@ -1,6 +1,5 @@
 package com.questionanswer.notifications.service;
 
-import com.questionanswer.notifications.dto.CreateNotificationRequest;
 import com.questionanswer.notifications.dto.NotificationsListResponse;
 import com.questionanswer.notifications.entity.Notification;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +12,7 @@ import java.util.UUID;
 public interface NotificationService {
     Notification getNotificationById(String id);
 
-    Notification createNotification(CreateNotificationRequest request);
+    Notification createNotification(Notification notification);
 
     NotificationsListResponse getNotificationsByUserId(UUID userId, Pageable pageable);
 

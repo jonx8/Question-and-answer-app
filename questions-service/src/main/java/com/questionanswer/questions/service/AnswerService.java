@@ -14,7 +14,9 @@ import java.util.UUID;
 public interface AnswerService {
     PagedResponse<AnswerResponse> getAnswersByAuthor(UUID authorId, Pageable pageable);
 
-    Answer createAnswerToQuestion(Long id, String answerText, JwtAuthenticationToken accessToken);
+    Answer createAnswer(Long questionId, String answerText, JwtAuthenticationToken accessToken);
+
+    Answer createAnswerWithEvent(Long questionId, String answerText, JwtAuthenticationToken accessToken);
 
     void deleteAnswer(Long id, JwtAuthenticationToken accessToken);
 }

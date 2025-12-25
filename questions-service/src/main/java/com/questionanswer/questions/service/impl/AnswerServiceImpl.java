@@ -1,10 +1,13 @@
 package com.questionanswer.questions.service.impl;
 
+import com.questionanswer.questions.components.EventPublisher;
 import com.questionanswer.questions.components.SecurityUtils;
 import com.questionanswer.questions.dto.AnswerResponse;
 import com.questionanswer.questions.dto.PagedResponse;
 import com.questionanswer.questions.entity.Answer;
+import com.questionanswer.questions.entity.NotificationEventType;
 import com.questionanswer.questions.entity.Question;
+import com.questionanswer.questions.events.AnswerCreatedEvent;
 import com.questionanswer.questions.exception.AnswerAlreadyExistsException;
 import com.questionanswer.questions.exception.AnswerNotFoundException;
 import com.questionanswer.questions.exception.AnswerOwnQuestionException;
@@ -16,6 +19,7 @@ import com.questionanswer.questions.service.AnswerService;
 import com.questionanswer.questions.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,11 +39,11 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionService questionService;
+    private final EventPublisher eventPublisher;
     private final SecurityUtils securityUtils;
 
     /**
@@ -50,6 +54,7 @@ public class AnswerServiceImpl implements AnswerService {
      * @param pageable pagination information (page number, size, sorting)
      * @return {@link PagedResponse} containing {@link AnswerResponse} objects
      */
+    @Transactional(readOnly = true)
     @Override
     public PagedResponse<AnswerResponse> getAnswersByAuthor(UUID authorId, Pageable pageable) {
         Page<Answer> page = answerRepository.findAllByAuthorOrderByCreatedAtDesc(authorId, pageable);
@@ -61,7 +66,7 @@ public class AnswerServiceImpl implements AnswerService {
      * Validates that the user is not answering their own question and
      * that the user hasn't already answered this question.
      *
-     * @param id the ID of the question to answer
+     * @param questionId the ID of the question to answer
      * @param answerText the content of the answer
      * @param accessToken JWT authentication token containing user information
      * @return the created {@link Answer} entity
@@ -71,19 +76,18 @@ public class AnswerServiceImpl implements AnswerService {
      */
     @Transactional
     @Override
-    public Answer createAnswerToQuestion(Long id, String answerText, JwtAuthenticationToken accessToken) {
-        Question question = questionService.getQuestion(id);
+    public Answer createAnswer(Long questionId, String answerText, JwtAuthenticationToken accessToken) {
+        Question question = questionService.getQuestion(questionId);
         UUID userId = securityUtils.getCurrentUserId(accessToken);
 
         if (question.getAuthor().equals(userId)) {
-            log.warn("User {} attempted to answer their own question {}", userId, id);
+            log.warn("User {} attempted to answer their own question {}", userId, questionId);
             throw new AnswerOwnQuestionException("You can not answer to your own question");
         }
 
-        log.debug("Checking if user {} has already answered question {}", userId, id);
-        if (answerRepository.existsByQuestionIdAndAuthor(id, userId)) {
-            log.warn("User {} attempted to answer question {} multiple times", userId, id);
-            throw AnswerAlreadyExistsException.withId(id);
+        if (answerRepository.existsByQuestionIdAndAuthor(questionId, userId)) {
+            log.warn("User {} attempted to answer question {} multiple times", userId, questionId);
+            throw AnswerAlreadyExistsException.withId(questionId);
         }
 
         Answer answer = Answer.builder()
@@ -95,6 +99,15 @@ public class AnswerServiceImpl implements AnswerService {
 
         return answerRepository.save(answer);
     }
+
+    @Override
+    public Answer createAnswerWithEvent(Long questionId, String answerText, JwtAuthenticationToken accessToken) {
+        Answer answer = createAnswer(questionId, answerText, accessToken);
+        eventPublisher.publishAnswerCreated(answer);
+        // TODO Транзакция
+        return answer;
+    }
+
 
     /**
      * Deletes an answer by its ID after verifying user authorization.

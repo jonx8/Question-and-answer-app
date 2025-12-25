@@ -1,13 +1,11 @@
 package com.questionanswer.notifications.controller;
 
-import com.questionanswer.notifications.dto.CreateNotificationRequest;
 import com.questionanswer.notifications.dto.NotificationsListResponse;
 import com.questionanswer.notifications.entity.Notification;
 import com.questionanswer.notifications.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,15 +48,6 @@ public class NotificationController {
     public ResponseEntity<Notification> getNotification(@PathVariable String id) {
         Notification notification = notificationService.getNotificationById(id);
         return ResponseEntity.ok(notification);
-    }
-
-    @Operation(summary = "Create new notification")
-    @PostMapping
-    public ResponseEntity<Notification> createNotification(@Valid @RequestBody CreateNotificationRequest request) {
-        Notification notification = notificationService.createNotification(request);
-        return ResponseEntity
-                .created(URI.create("/api/notifications/%s".formatted(notification.getId())))
-                .body(notification);
     }
 
     @Operation(summary = "Mark notification as read")

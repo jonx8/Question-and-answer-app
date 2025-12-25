@@ -42,7 +42,7 @@ public class AnswerController {
     @ApiResponse(responseCode = "201", useReturnTypeSchema = true)
     public ResponseEntity<Answer> createAnswerToQuestion(@Valid @RequestBody CreateAnswerRequest dto,
                                                          JwtAuthenticationToken accessToken) {
-        Answer answer = answerService.createAnswerToQuestion(dto.questionId(), dto.text(), accessToken);
+        Answer answer = answerService.createAnswerWithEvent(dto.questionId(), dto.text(), accessToken);
         return ResponseEntity
                 .created(URI.create("/api/questions/%d/answers/%d"
                         .formatted(answer.getQuestion().getId(), answer.getId())))
