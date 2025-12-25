@@ -1,8 +1,8 @@
-insert into questions(id, title, text, author, status)
-values (1, 'Question title', 'Far far away, behind', '9bce5101-38d7-462d-a891-047f6c1b6129', 'PUBLISHED'),
-       (2, 'How i met your mother?', 'Lorem ipsum dolor si','9bce5101-38d7-462d-a891-047f6c1b6129', 'DRAFT'),
-       (3, 'Question title 2', 'Text text text', 'e95f8551-8bd3-477b-85b5-a3d4a5c143a8', 'PUBLISHED'),
-       (4, 'Question title 3', 'Text text text', 'e95f8551-8bd3-477b-85b5-a3d4a5c143a8', 'BANNED');
+insert into questions(id, title, text, author)
+values (1, 'Question title', 'Far far away, behind', '9bce5101-38d7-462d-a891-047f6c1b6129'),
+       (2, 'How i met your mother?', 'Lorem ipsum dolor si','9bce5101-38d7-462d-a891-047f6c1b6129'),
+       (3, 'Question title 2', 'Text text text', 'e95f8551-8bd3-477b-85b5-a3d4a5c143a8'),
+       (4, 'Question title 3', 'Text text text', 'e95f8551-8bd3-477b-85b5-a3d4a5c143a8');
 
 insert into answers(text, question_id, author)
 values ('Far far away, behind the word mountains, far from the countries Vokalia' ||

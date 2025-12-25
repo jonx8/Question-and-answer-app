@@ -1,19 +1,24 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    username: questions_user
-    password: password
+    username: postgres
+    password: postgres
     url: jdbc:postgresql://qa-app-db:5432/questions
 
   jpa:
     hibernate:
       ddl-auto: validate
-    open-in-view: true
-
+    open-in-view: false
 
   liquibase:
     drop-first: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
 
   security:
     oauth2:

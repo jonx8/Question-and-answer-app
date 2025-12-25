@@ -15,12 +15,19 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    open-in-view: true
+    open-in-view: false
 
 
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     drop-first: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
 
   security:
     oauth2:

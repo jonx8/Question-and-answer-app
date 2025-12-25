@@ -1,4 +1,4 @@
-package com.questionanswer.notifications.controller.dto;
+package com.questionanswer.notifications.dto;
 
 import com.questionanswer.notifications.entity.Notification;
 

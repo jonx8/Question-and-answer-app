@@ -21,7 +21,7 @@ class AnswerControllerIT extends BaseIntegrationTest {
     void getAnswersByAuthor_AuthorHasAnswers_ReturnsAnswers() throws Exception {
         var requestBuilder = MockMvcRequestBuilders
                 .get(PATH_PREFIX)
-                .queryParam("author", TestConstants.USER_ID_1)
+                .queryParam("author", String.valueOf(TestConstants.USER_ID_1))
                 .with(jwt());
 
         this.mockMvc.perform(requestBuilder)
@@ -29,7 +29,7 @@ class AnswerControllerIT extends BaseIntegrationTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$[0].id").value(TestConstants.ANSWER_ID_1)
+                        jsonPath("$.data[0].id").value(TestConstants.ANSWER_ID_1)
                 );
     }
 
@@ -39,7 +39,7 @@ class AnswerControllerIT extends BaseIntegrationTest {
         var requestBuilder = MockMvcRequestBuilders
                 .delete(PATH_PREFIX + "/" + TestConstants.ANSWER_ID_1)
                 .with(jwt()
-                        .jwt(jwt -> jwt.subject(TestConstants.USER_ID_1))
+                        .jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_1)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER))
                 );
 
@@ -53,7 +53,7 @@ class AnswerControllerIT extends BaseIntegrationTest {
         var requestBuilder = MockMvcRequestBuilders
                 .delete(PATH_PREFIX + "/" + TestConstants.ANSWER_ID_1)
                 .with(jwt()
-                        .jwt(jwt -> jwt.subject(TestConstants.USER_ID_2))
+                        .jwt(jwt -> jwt.subject(String.valueOf(TestConstants.USER_ID_2)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_USER))
                 );
 
@@ -70,7 +70,7 @@ class AnswerControllerIT extends BaseIntegrationTest {
         var requestBuilder = MockMvcRequestBuilders
                 .delete(PATH_PREFIX + "/" + TestConstants.ANSWER_ID_1)
                 .with(jwt()
-                        .jwt(jwt -> jwt.subject(TestConstants.ADMIN_USER_ID))
+                        .jwt(jwt -> jwt.subject(String.valueOf(TestConstants.ADMIN_USER_ID)))
                         .authorities(new SimpleGrantedAuthority(TestConstants.ROLE_ADMIN))
                 );
 

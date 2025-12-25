@@ -1,10 +1,9 @@
 package com.questionanswer.questions.service.impl;
 
-import com.questionanswer.questions.controller.dto.QuestionDto;
-import com.questionanswer.questions.controller.dto.QuestionHeader;
-import com.questionanswer.questions.entity.Answer;
+import com.questionanswer.questions.components.SecurityUtils;
+import com.questionanswer.questions.dto.*;
 import com.questionanswer.questions.entity.Question;
-import com.questionanswer.questions.entity.QuestionStatus;
+import com.questionanswer.questions.exception.QuestionNotFoundException;
 import com.questionanswer.questions.repository.QuestionRepository;
 import com.questionanswer.questions.TestConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,16 +12,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 /**
  * Unit tests for {@link QuestionServiceImpl}
@@ -42,313 +43,172 @@ class QuestionServiceImplTest {
     @Mock
     private QuestionRepository questionRepository;
 
+    @Mock
+    private SecurityUtils securityUtils;
+
     @InjectMocks
     private QuestionServiceImpl questionService;
 
     private Question testQuestion;
     private JwtAuthenticationToken adminToken;
-    private JwtAuthenticationToken userToken;
+    private JwtAuthenticationToken questionAuthorToken;
     private JwtAuthenticationToken otherUserToken;
+    private Pageable testPageable;
 
     @BeforeEach
     void setUp() {
-        testQuestion = new Question(
-                TestConstants.QUESTION_ID_1,
-                TestConstants.TEST_QUESTION_TITLE,
-                TestConstants.TEST_QUESTION_TEXT,
-                TestConstants.USER_ID_1,
-                QuestionStatus.PUBLISHED,
-                new ArrayList<>(),
-                Instant.now()
-        );
+        testQuestion = new Question();
+        testQuestion.setId(TestConstants.QUESTION_ID_1);
+        testQuestion.setTitle(TestConstants.TEST_QUESTION_TITLE);
+        testQuestion.setText(TestConstants.TEST_QUESTION_TEXT);
+        testQuestion.setAuthor(TestConstants.USER_ID_1);
+        testQuestion.setCreatedAt(Instant.now());
 
         adminToken = createJwtToken(TestConstants.ADMIN_USER_ID, TestConstants.ROLE_ADMIN);
-        userToken = createJwtToken(TestConstants.USER_ID_1, TestConstants.ROLE_USER);
+        questionAuthorToken = createJwtToken(TestConstants.USER_ID_1, TestConstants.ROLE_USER);
         otherUserToken = createJwtToken(TestConstants.USER_ID_2, TestConstants.ROLE_USER);
+
+        testPageable = PageRequest.of(0, 10);
     }
 
     @Test
-    void getQuestion_QuestionExistsAndUserIsAuthor_ReturnsQuestion() {
+    void getQuestion_QuestionExists_ReturnsQuestion() {
         // Arrange
         when(questionRepository.findById(TestConstants.QUESTION_ID_1))
                 .thenReturn(Optional.of(testQuestion));
 
         // Act
-        Question result = questionService.getQuestion(TestConstants.QUESTION_ID_1, userToken);
+        QuestionResponse result = questionService.getQuestionWithAnswers(TestConstants.QUESTION_ID_1);
 
         // Assert
-        assertThat(result.getId()).isEqualTo(TestConstants.QUESTION_ID_1);
-        assertThat(result.getTitle()).isEqualTo(TestConstants.TEST_QUESTION_TITLE);
-        assertThat(result.getAuthor()).isEqualTo(userToken.getToken().getSubject());
-        assertThat(result.getAnswers()).isEmpty();
+        assertThat(result.id()).isEqualTo(TestConstants.QUESTION_ID_1);
+        assertThat(result.answers()).isEmpty();
+        assertThat(result.title()).isEqualTo(TestConstants.TEST_QUESTION_TITLE);
         verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
     }
 
     @Test
-    void getQuestion_QuestionExistsAndUserIsAdmin_ReturnsQuestion() {
-        // Arrange
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-
-        // Act
-        Question result = questionService.getQuestion(TestConstants.QUESTION_ID_1, adminToken);
-
-        // Assert
-        assertThat(result.getId()).isEqualTo(TestConstants.QUESTION_ID_1);
-        assertThat(result.getTitle()).isEqualTo(TestConstants.TEST_QUESTION_TITLE);
-        assertThat(result.getAuthor()).isEqualTo(userToken.getToken().getSubject());
-        assertThat(result.getAnswers()).isEmpty();
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-    }
-
-    @Test
-    void getQuestion_QuestionNotFound_ThrowsException() {
+    void getQuestion_QuestionNotFound_ThrowsQuestionNotFoundException() {
         // Arrange
         when(questionRepository.findById(TestConstants.NON_EXISTENT_QUESTION_ID))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> questionService.getQuestion(TestConstants.NON_EXISTENT_QUESTION_ID, userToken))
-                .isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> questionService.getQuestionWithAnswers(TestConstants.NON_EXISTENT_QUESTION_ID))
+                .isInstanceOf(QuestionNotFoundException.class);
     }
 
     @Test
-    void getQuestion_QuestionIsDraftAndUserIsNotAuthor_ThrowsAccessDeniedException() {
+    void getQuestions_ReturnsPagedResponse() {
         // Arrange
-        testQuestion.setStatus(QuestionStatus.DRAFT);
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-
-        // Act & Assert
-        assertThatThrownBy(() -> questionService.getQuestion(TestConstants.QUESTION_ID_1, otherUserToken))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You do not have access to this question");
-    }
-
-    @Test
-    void getQuestion_QuestionIsDraftAndUserIsAuthor_ReturnsQuestion() {
-        // Arrange
-        testQuestion.setStatus(QuestionStatus.DRAFT);
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
+        Page<Question> questionPage = new PageImpl<>(List.of(testQuestion), testPageable, 1);
+        when(questionRepository.findAll(testPageable)).thenReturn(questionPage);
 
         // Act
-        Question result = questionService.getQuestion(TestConstants.QUESTION_ID_1, userToken);
+        PagedResponse<QuestionHeader> result = questionService.getQuestions(testPageable);
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
+        assertThat(result.data()).hasSize(1);
+        verify(questionRepository).findAll(testPageable);
     }
 
     @Test
-    void getQuestion_QuestionIsDraftAndUserIsAdmin_ReturnsQuestion() {
+    void getQuestionsByAuthor_ReturnsPagedResponse() {
         // Arrange
-        testQuestion.setStatus(QuestionStatus.DRAFT);
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
+        Page<Question> questionPage = new PageImpl<>(List.of(testQuestion), testPageable, 1);
+        when(questionRepository.findAllByAuthorOrderByCreatedAtDesc(TestConstants.USER_ID_1, testPageable))
+                .thenReturn(questionPage);
 
         // Act
-        Question result = questionService.getQuestion(TestConstants.QUESTION_ID_1, adminToken);
+        PagedResponse<QuestionHeader> result = questionService.getQuestionsByAuthor(TestConstants.USER_ID_1, testPageable);
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-    }
-
-    @Test
-    void getQuestions_NoAuthorId_ReturnsPublishedQuestions() {
-        // Arrange
-        List<Question> publishedQuestions = List.of(testQuestion);
-        when(questionRepository.findAllByStatusOrderByCreatedAtDesc(QuestionStatus.PUBLISHED))
-                .thenReturn(publishedQuestions);
-
-        // Act
-        List<QuestionHeader> result = questionService.getQuestions(null, userToken);
-
-        // Assert
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).id()).isEqualTo(TestConstants.QUESTION_ID_1);
-        assertThat(result.get(0).title()).isEqualTo(TestConstants.TEST_QUESTION_TITLE);
-        verify(questionRepository).findAllByStatusOrderByCreatedAtDesc(QuestionStatus.PUBLISHED);
-    }
-
-    @Test
-    void getQuestions_AuthorIdProvidedAndUserIsNotAuthorOrAdmin_ReturnsOnlyPublishedQuestions() {
-        // Arrange
-        List<Question> publishedQuestions = List.of(testQuestion);
-        when(questionRepository.findAllByAuthorAndStatusOrderByCreatedAtDesc(TestConstants.USER_ID_1, QuestionStatus.PUBLISHED))
-                .thenReturn(publishedQuestions);
-
-        // Act
-        List<QuestionHeader> result = questionService.getQuestions(TestConstants.USER_ID_1, otherUserToken);
-
-        // Assert
-        assertThat(result).hasSize(1);
-        verify(questionRepository).findAllByAuthorAndStatusOrderByCreatedAtDesc(TestConstants.USER_ID_1, QuestionStatus.PUBLISHED);
-        verify(questionRepository, never()).findAllByAuthorOrderByCreatedAtDesc(any());
-    }
-
-    @Test
-    void getQuestions_AuthorIdProvidedAndUserIsAuthor_ReturnsAllQuestions() {
-        // Arrange
-        List<Question> allQuestions = List.of(testQuestion);
-        when(questionRepository.findAllByAuthorOrderByCreatedAtDesc(TestConstants.USER_ID_1))
-                .thenReturn(allQuestions);
-
-        // Act
-        List<QuestionHeader> result = questionService.getQuestions(TestConstants.USER_ID_1, userToken);
-
-        // Assert
-        assertThat(result).hasSize(1);
-        verify(questionRepository).findAllByAuthorOrderByCreatedAtDesc(TestConstants.USER_ID_1);
-    }
-
-    @Test
-    void getQuestions_AuthorIdProvidedAndUserIsAdmin_ReturnsAllQuestions() {
-        // Arrange
-        List<Question> allQuestions = List.of(testQuestion);
-        when(questionRepository.findAllByAuthorOrderByCreatedAtDesc(TestConstants.USER_ID_1))
-                .thenReturn(allQuestions);
-
-        // Act
-        List<QuestionHeader> result = questionService.getQuestions(TestConstants.USER_ID_1, adminToken);
-
-        // Assert
-        assertThat(result).hasSize(1);
-        verify(questionRepository).findAllByAuthorOrderByCreatedAtDesc(TestConstants.USER_ID_1);
+        assertThat(result.data()).hasSize(1);
+        verify(questionRepository).findAllByAuthorOrderByCreatedAtDesc(TestConstants.USER_ID_1, testPageable);
     }
 
     @Test
     void createQuestion_ValidData_CreatesAndReturnsQuestion() {
         // Arrange
+        CreateQuestionRequest request = new CreateQuestionRequest(
+                TestConstants.TEST_QUESTION_TITLE,
+                TestConstants.TEST_QUESTION_TEXT
+        );
+        when(securityUtils.getCurrentUserId(questionAuthorToken)).thenReturn(TestConstants.USER_ID_1);
         when(questionRepository.save(any(Question.class))).thenReturn(testQuestion);
 
         // Act
-        Question result = questionService.createQuestion(
-                TestConstants.TEST_QUESTION_TITLE,
-                TestConstants.TEST_QUESTION_TEXT,
-                TestConstants.USER_ID_1,
-                QuestionStatus.PUBLISHED
-        );
+        Question result = questionService.createQuestion(request, questionAuthorToken);
 
         // Assert
-        assertThat(result).isNotNull();
-        assertThat(result.getTitle()).isEqualTo(TestConstants.TEST_QUESTION_TITLE);
-        assertThat(result.getText()).isEqualTo(TestConstants.TEST_QUESTION_TEXT);
-        assertThat(result.getAuthor()).isEqualTo(TestConstants.USER_ID_1);
-        assertThat(result.getStatus()).isEqualTo(QuestionStatus.PUBLISHED);
+        assertThat(result).isEqualTo(testQuestion);
+        verify(securityUtils).getCurrentUserId(questionAuthorToken);
         verify(questionRepository).save(any(Question.class));
     }
 
     @Test
     void updateQuestion_UserIsAuthor_UpdatesQuestion() {
         // Arrange
-        QuestionDto dto = new QuestionDto("Updated Title", "Updated Text", QuestionStatus.DRAFT);
+        UpdateQuestionRequest request = new UpdateQuestionRequest(
+                "Updated Title",
+                "Updated Text"
+        );
         when(questionRepository.findById(TestConstants.QUESTION_ID_1))
                 .thenReturn(Optional.of(testQuestion));
-        when(questionRepository.save(any(Question.class))).thenReturn(testQuestion);
+        when(securityUtils.isOwnerOrAdmin(questionAuthorToken, TestConstants.USER_ID_1))
+                .thenReturn(true);
 
         // Act
-        Question result = questionService.updateQuestion(TestConstants.QUESTION_ID_1, dto, userToken);
+        Question result = questionService.updateQuestion(TestConstants.QUESTION_ID_1, request, questionAuthorToken);
 
         // Assert
-        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(testQuestion);
+        assertThat(result.getTitle()).isEqualTo("Updated Title");
+        assertThat(result.getText()).isEqualTo("Updated Text");
         verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).save(any(Question.class));
+        verify(securityUtils).isOwnerOrAdmin(questionAuthorToken, TestConstants.USER_ID_1);
     }
 
     @Test
-    void updateQuestion_UserIsNotAuthor_ThrowsAccessDeniedException() {
+    void updateQuestion_UserIsAdmin_UpdatesQuestion() {
         // Arrange
-        QuestionDto dto = new QuestionDto("Updated Title", "Updated Text", QuestionStatus.DRAFT);
+        UpdateQuestionRequest request = new UpdateQuestionRequest(
+                "Updated Title",
+                "Updated Text"
+        );
         when(questionRepository.findById(TestConstants.QUESTION_ID_1))
                 .thenReturn(Optional.of(testQuestion));
+        when(securityUtils.isOwnerOrAdmin(adminToken, TestConstants.USER_ID_1))
+                .thenReturn(true);
+
+        // Act
+        Question result = questionService.updateQuestion(TestConstants.QUESTION_ID_1, request, adminToken);
+
+        // Assert
+        assertThat(result).isEqualTo(testQuestion);
+        verify(securityUtils).isOwnerOrAdmin(adminToken, TestConstants.USER_ID_1);
+    }
+
+    @Test
+    void updateQuestion_UserIsNotAuthorOrAdmin_ThrowsAccessDeniedException() {
+        // Arrange
+        UpdateQuestionRequest request = new UpdateQuestionRequest(
+                "Updated Title",
+                "Updated Text"
+        );
+        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
+                .thenReturn(Optional.of(testQuestion));
+        when(securityUtils.isOwnerOrAdmin(otherUserToken, TestConstants.USER_ID_1))
+                .thenReturn(false);
 
         // Act & Assert
-        assertThatThrownBy(() -> questionService.updateQuestion(TestConstants.QUESTION_ID_1, dto, otherUserToken))
+        assertThatThrownBy(() -> questionService.updateQuestion(TestConstants.QUESTION_ID_1, request, otherUserToken))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("You can not to update this question");
-    }
 
-    @Test
-    void addAnswerToQuestion_QuestionExistsAndUserIsNotAuthor_AddsAnswer() {
-        // Arrange
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-        when(questionRepository.save(any(Question.class))).thenReturn(testQuestion);
-
-        // Act
-        Question result = questionService.addAnswerToQuestion(
-                TestConstants.QUESTION_ID_1,
-                TestConstants.TEST_ANSWER_TEXT,
-                TestConstants.USER_ID_2
-        );
-
-        // Assert
-        assertThat(result).isNotNull();
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).save(any(Question.class));
-    }
-
-    @Test
-    void addAnswerToQuestion_UserIsAuthor_ThrowsAccessDeniedException() {
-        // Arrange
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-
-        // Act & Assert
-        assertThatThrownBy(() -> questionService.addAnswerToQuestion(
-                TestConstants.QUESTION_ID_1,
-                TestConstants.TEST_ANSWER_TEXT,
-                TestConstants.USER_ID_1
-        )).isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You can not to add an answer to your own question");
-    }
-
-    @Test
-    void addAnswerToQuestion_UserAlreadyAnswered_ThrowsAccessDeniedException() {
-        // Arrange
-        Answer existingAnswer = new Answer(null, "Existing answer", TestConstants.USER_ID_2, testQuestion, Instant.now());
-        testQuestion.getAnswers().add(existingAnswer);
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-
-        // Act & Assert
-        assertThatThrownBy(() -> questionService.addAnswerToQuestion(
-                TestConstants.QUESTION_ID_1,
-                TestConstants.TEST_ANSWER_TEXT,
-                TestConstants.USER_ID_2
-        )).isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You can have the only one answer for each question");
-    }
-
-    @Test
-    void changeStatus_UserIsAuthor_ChangesStatus() {
-        // Arrange
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-        when(questionRepository.save(any(Question.class))).thenReturn(testQuestion);
-
-        // Act
-        questionService.changeStatus(TestConstants.QUESTION_ID_1, QuestionStatus.BANNED, userToken);
-
-        // Assert
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).save(any(Question.class));
-    }
-
-    @Test
-    void changeStatus_UserIsNotAuthor_ThrowsAccessDeniedException() {
-        // Arrange
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-
-        // Act & Assert
-        assertThatThrownBy(() -> questionService.changeStatus(TestConstants.QUESTION_ID_1, QuestionStatus.BANNED, otherUserToken))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You can not to edit this question");
+        verify(securityUtils).isOwnerOrAdmin(otherUserToken, TestConstants.USER_ID_1);
     }
 
     @Test
@@ -356,25 +216,15 @@ class QuestionServiceImplTest {
         // Arrange
         when(questionRepository.findById(TestConstants.QUESTION_ID_1))
                 .thenReturn(Optional.of(testQuestion));
+        when(securityUtils.isOwnerOrAdmin(questionAuthorToken, TestConstants.USER_ID_1))
+                .thenReturn(true);
 
         // Act
-        questionService.deleteQuestion(TestConstants.QUESTION_ID_1, userToken);
+        questionService.deleteQuestion(TestConstants.QUESTION_ID_1, questionAuthorToken);
 
         // Assert
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).deleteById(TestConstants.QUESTION_ID_1);
-    }
-
-    @Test
-    void deleteQuestion_UserIsNotAuthor_ThrowsAccessDeniedException() {
-        // Arrange
-        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
-                .thenReturn(Optional.of(testQuestion));
-
-        // Act & Assert
-        assertThatThrownBy(() -> questionService.deleteQuestion(TestConstants.QUESTION_ID_1, otherUserToken))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You can not to delete this question");
+        verify(questionRepository).delete(testQuestion);
+        verify(securityUtils).isOwnerOrAdmin(questionAuthorToken, TestConstants.USER_ID_1);
     }
 
     @Test
@@ -382,27 +232,59 @@ class QuestionServiceImplTest {
         // Arrange
         when(questionRepository.findById(TestConstants.QUESTION_ID_1))
                 .thenReturn(Optional.of(testQuestion));
+        when(securityUtils.isOwnerOrAdmin(adminToken, TestConstants.USER_ID_1))
+                .thenReturn(true);
 
         // Act
         questionService.deleteQuestion(TestConstants.QUESTION_ID_1, adminToken);
 
         // Assert
-        verify(questionRepository).findById(TestConstants.QUESTION_ID_1);
-        verify(questionRepository).deleteById(TestConstants.QUESTION_ID_1);
+        verify(questionRepository).delete(testQuestion);
+        verify(securityUtils).isOwnerOrAdmin(adminToken, TestConstants.USER_ID_1);
     }
 
-    private JwtAuthenticationToken createJwtToken(String subject, String... authorities) {
+    @Test
+    void deleteQuestion_UserIsNotAuthorOrAdmin_ThrowsAccessDeniedException() {
+        // Arrange
+        when(questionRepository.findById(TestConstants.QUESTION_ID_1))
+                .thenReturn(Optional.of(testQuestion));
+        when(securityUtils.isOwnerOrAdmin(otherUserToken, TestConstants.USER_ID_1))
+                .thenReturn(false);
+
+        // Act & Assert
+        assertThatThrownBy(() -> questionService.deleteQuestion(TestConstants.QUESTION_ID_1, otherUserToken))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("You can not to delete this question");
+
+        verify(questionRepository, never()).delete(any(Question.class));
+        verify(securityUtils).isOwnerOrAdmin(otherUserToken, TestConstants.USER_ID_1);
+    }
+
+    @Test
+    void deleteQuestion_QuestionNotFound_ThrowsQuestionNotFoundException() {
+        // Arrange
+        when(questionRepository.findById(TestConstants.NON_EXISTENT_QUESTION_ID))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> questionService.deleteQuestion(TestConstants.NON_EXISTENT_QUESTION_ID, questionAuthorToken))
+                .isInstanceOf(QuestionNotFoundException.class);
+
+        verify(questionRepository, never()).delete(any(Question.class));
+    }
+
+    private JwtAuthenticationToken createJwtToken(UUID subject, String... authorities) {
         List<SimpleGrantedAuthority> grantedAuthorities = Stream.of(authorities)
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
         Jwt jwt = Jwt.withTokenValue("test-token")
                 .header("alg", "HS256")
-                .claim("sub", subject)
+                .claim("sub", subject.toString())
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
 
-        return new JwtAuthenticationToken(jwt, grantedAuthorities, subject);
+        return new JwtAuthenticationToken(jwt, grantedAuthorities, subject.toString());
     }
 }

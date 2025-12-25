@@ -1,6 +1,8 @@
 package com.questionanswer.notifications.entity;
 
 public enum NotificationType {
-    NEW_ANSWER,
-    SYSTEM,
+    ANSWER_CREATED,
+    QUESTION_CREATED,
+    NEW_FOLLOWER,
+    SYSTEM
 }

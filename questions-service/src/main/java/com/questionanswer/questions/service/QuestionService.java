@@ -1,26 +1,28 @@
 package com.questionanswer.questions.service;
 
 
-import com.questionanswer.questions.controller.dto.QuestionDto;
-import com.questionanswer.questions.controller.dto.QuestionHeader;
+import com.questionanswer.questions.dto.*;
 import com.questionanswer.questions.entity.Question;
-import com.questionanswer.questions.entity.QuestionStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.UUID;
 
+@Service
 public interface QuestionService {
-    Question getQuestion(Long id, JwtAuthenticationToken accessToken);
 
-    List<QuestionHeader> getQuestions(String authorId, JwtAuthenticationToken accessToken);
+    Question getQuestion(Long id);
 
-    Question createQuestion(String title, String text, String authorId, QuestionStatus status);
+    QuestionResponse getQuestionWithAnswers(Long id);
 
-    Question updateQuestion(Long id, QuestionDto dto, JwtAuthenticationToken accessToken);
+    PagedResponse<QuestionHeader> getQuestions(Pageable pageable);
 
-    Question addAnswerToQuestion(Long id, String answerText, String authorId);
+    PagedResponse<QuestionHeader> getQuestionsByAuthor(UUID authorId, Pageable pageable);
 
-    void changeStatus(Long id, QuestionStatus status, JwtAuthenticationToken accessToken);
+    Question createQuestion(CreateQuestionRequest request, JwtAuthenticationToken accessToken);
+
+    Question updateQuestion(Long id, UpdateQuestionRequest request, JwtAuthenticationToken accessToken);
 
     void deleteQuestion(Long id, JwtAuthenticationToken accessToken);
 }

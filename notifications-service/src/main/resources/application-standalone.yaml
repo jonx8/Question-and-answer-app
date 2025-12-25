@@ -5,20 +5,14 @@ spring:
   application:
     name: notifications-service
 
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    name: ${DB_NAME:notifications}
-    username: ${DB_USER:notifications_user}
-    password: ${DB_PASSWORD:password}
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${spring.datasource.name}
-
-  jdbc:
-    template:
-      fetch-size: 100
-
-  liquibase:
-    drop-first: true
-    change-log: classpath:/db/changelog/db.changelog-master.xml
+  data:
+    mongodb:
+      database: notifications
+      port: 27017
+      username: mongodb
+      password: password
+      authentication-database: admin
+      auto-index-creation: true
 
   security:
     oauth2:
@@ -29,6 +23,13 @@ spring:
   cloud:
     config:
       enabled: false
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
 
 eureka:
   client:
@@ -42,13 +43,6 @@ springdoc:
     oauth:
       client-id: notifications-service-swagger
       use-pkce-with-authorization-code-grant: true
-
-app:
-  notifications:
-    cleanup:
-      cron: "0 0 2 * * ?"
-      retention-days: 1
-      enabled: true
 
 keycloak:
   url: ${KEYCLOAK_URL:http://localhost:8180}
