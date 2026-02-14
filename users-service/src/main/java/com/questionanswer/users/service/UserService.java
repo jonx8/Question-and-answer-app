@@ -1,24 +1,13 @@
 package com.questionanswer.users.service;
 
-import org.keycloak.representations.idm.UserRepresentation;
+import com.questionanswer.users.dto.RegisterRequest;
+import com.questionanswer.users.dto.UserProfileResponse;
 
-import java.util.List;
+import java.util.UUID;
 
 public interface UserService {
 
-    List<UserRepresentation> getUsers();
+    UserProfileResponse registerUser(RegisterRequest request);
 
-    UserRepresentation getUserById(String userId);
-
-    List<UserRepresentation> findUserByEmail(String email);
-
-    List<UserRepresentation> findUserByUsername(String username);
-
-    UserRepresentation createUser(UserRepresentation user);
-
-    UserRepresentation updateUser(String userId, UserRepresentation user);
-
-    void deleteUser(String userId);
-
-    void resetPassword(String userId, String newPassword);
+    UserProfileResponse getUserProfile(UUID userId);
 }

@@ -128,8 +128,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: questions
     restart: on-failure
-    ports:
-      - "5432:5432"
     volumes:
       - qa-db-data:/var/lib/postgresql/data
     networks:
@@ -156,6 +154,19 @@ services:
       keycloak:
         condition: service_started
     restart: always
+    networks:
+      - qa-app-net
+
+  users-db:
+    container_name: users-db
+    image: postgres:16.3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users
+    restart: on-failure
+    volumes:
+      - users-db-data:/var/lib/postgresql/data
     networks:
       - qa-app-net
 
@@ -194,8 +205,6 @@ services:
       MONGO_INITDB_DATABASE: notifications
       MONGO_INITDB_ROOT_USERNAME: mongodb
       MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - "27017:27017"
     restart: on-failure
     networks:
       - qa-app-net
@@ -226,6 +235,7 @@ volumes:
   qa-db-data:
   notifications-db-data:
   keycloak-db-data:
+  users-db-data:
 
 networks:
   qa-app-net:

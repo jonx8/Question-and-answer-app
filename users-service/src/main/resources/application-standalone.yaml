@@ -5,6 +5,22 @@ spring:
   application:
     name: users-service
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    name: ${DB_NAME:users}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${spring.datasource.name}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    drop-first: true
+
   security:
     oauth2:
       resourceserver:
@@ -30,7 +46,9 @@ springdoc:
       use-pkce-with-authorization-code-grant: true
 
 keycloak:
-  clientId: admin-cli
-  clientSecret: ${KEYCLOAK_SECRET}
+  admin:
+    client-id: admin-cli
+    client-secret: ${KEYCLOAK_ADMIN_SECRET:**********}
+
   realm: ${KEYCLOAK_REALM:question-and-answer-app}
   url: ${KEYCLOAK_URL:http://localhost:8180}

@@ -3,7 +3,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
-    url: jdbc:postgresql://qa-app-db:5432/questions
+    url: jdbc:postgresql://qa-app-db:5432/questions?sslmode=disable
+
 
   jpa:
     hibernate:

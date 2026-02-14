@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class KeycloakBeans {
 
-    @Value("${keycloak.clientId}")
+    @Value("${keycloak.admin.client-id}")
     private String clientId;
 
-    @Value("${keycloak.clientSecret}")
+    @Value("${keycloak.admin.client-secret}")
     private String clientSecret;
 
     @Value("${keycloak.realm}")
