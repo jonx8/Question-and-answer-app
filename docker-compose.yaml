@@ -7,6 +7,12 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: keycloak
     restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres || exit 1" ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
     networks:
@@ -20,7 +26,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: password
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
+      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak?sslmode=disable
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: password
       KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/keycloak.crt.pem
@@ -33,7 +39,8 @@ services:
       - "8180:8080"
       - "8443:8443"
     depends_on:
-      - keycloak-db
+      keycloak-db:
+        condition: service_healthy
     networks:
       - qa-app-net
 
@@ -111,7 +118,7 @@ services:
       eureka-server:
         condition: service_healthy
       qa-app-db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_started
       keycloak:
@@ -128,6 +135,12 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: questions
     restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres || exit 1" ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
     volumes:
       - qa-db-data:/var/lib/postgresql/data
     networks:
@@ -153,6 +166,8 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
+      users-db:
+        condition: service_healthy
     restart: always
     networks:
       - qa-app-net
@@ -165,6 +180,12 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: users
     restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres || exit 1" ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
     volumes:
       - users-db-data:/var/lib/postgresql/data
     networks:
