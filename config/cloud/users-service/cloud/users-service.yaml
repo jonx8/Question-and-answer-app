@@ -1,4 +1,19 @@
 spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://users-db:5432/users?sslmode=disable
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  liquibase:
+    drop-first: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
   security:
     oauth2:
       resourceserver:
@@ -21,7 +36,9 @@ springdoc:
 
 
 keycloak:
-  clientId: admin-cli
-  clientSecret: ${KEYCLOAK_SECRET:**********}
+  admin:
+    client-id: admin-cli
+    client-secret: ${KEYCLOAK_ADMIN_SECRET:**********}
+
   realm: question-and-answer-app
   url: http://keycloak:8080
