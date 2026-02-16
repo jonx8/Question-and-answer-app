@@ -39,6 +39,7 @@ allprojects {
     dependencyManagement {
         imports {
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+            mavenBom("org.testcontainers:testcontainers-bom:2.0.3")
         }
     }
 
